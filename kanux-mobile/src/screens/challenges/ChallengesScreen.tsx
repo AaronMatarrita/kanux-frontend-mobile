@@ -1,28 +1,20 @@
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { colors, typography, commonStyles } from "@theme";
 
-export function ChallengesScreen() {
+const ChallengesScreen: React.FC = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Retos</Text>
-      <Text style={styles.subtitle}>Vista Retos</Text>
+    <View style={[commonStyles.container, commonStyles.centerContainer]}>
+      <Text style={styles.title}>Challenges</Text>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-  },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
+    ...typography.h1,
+    color: colors.text.primary,
   },
 });
+
+export default ChallengesScreen;

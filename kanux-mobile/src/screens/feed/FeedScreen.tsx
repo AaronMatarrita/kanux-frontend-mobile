@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { colors, typography, commonStyles } from "@theme";
 
-const MessagesScreen: React.FC = () => {
+const FeedScreen: React.FC = () => {
   return (
     <View style={[commonStyles.container, commonStyles.centerContainer]}>
-      <Text style={styles.title}>Messages</Text>
+      <Text style={styles.title}>Feed</Text>
     </View>
   );
 };
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MessagesScreen;
+export default FeedScreen;
