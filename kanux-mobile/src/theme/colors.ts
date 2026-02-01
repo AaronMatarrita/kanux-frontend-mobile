@@ -4,6 +4,9 @@ export const colors = {
   primaryLight: "#dcfce7",
   primaryDark: "#16a34a",
 
+  // Kanux Green
+  emerald600: "#16a34a",
+
   // Neutral
   white: "#ffffff",
   black: "#000000",
