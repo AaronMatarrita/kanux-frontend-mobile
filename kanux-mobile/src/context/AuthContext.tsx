@@ -1,9 +1,7 @@
-"use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Session } from "../types/session.types";
 
-// Intenta importar expo-secure-store para almacenamiento encriptado
 let SecureStore: any = null;
 try {
   SecureStore = require("expo-secure-store");
@@ -25,18 +23,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Cargar sesión guardada al iniciar
   useEffect(() => {
     const loadSession = async () => {
       try {
-        // Intenta leer del almacenamiento seguro primero
         if (SecureStore) {
           const sessionData = await SecureStore.getItemAsync("session");
           if (sessionData) {
             setSession(JSON.parse(sessionData));
           }
         } else {
-          // Fallback a AsyncStorage si SecureStore no está disponible
           const stored = await AsyncStorage.getItem("session");
           if (stored) {
             setSession(JSON.parse(stored));
@@ -54,7 +49,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (sessionData: Session) => {
     try {
-      // Guardar en almacenamiento seguro (Expo SecureStore) o fallback a AsyncStorage
       if (SecureStore) {
         await SecureStore.setItemAsync("session", JSON.stringify(sessionData));
       } else {
@@ -70,7 +64,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try {
-      // Limpiar almacenamiento
       if (SecureStore) {
         await SecureStore.deleteItemAsync("session");
       } else {

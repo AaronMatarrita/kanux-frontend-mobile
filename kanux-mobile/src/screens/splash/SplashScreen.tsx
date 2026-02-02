@@ -2,19 +2,28 @@ import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { colors, commonStyles } from "@theme";
 import { KanuxLogo } from "@components/KanuxLogo";
+import { useAuth } from "@context/AuthContext";
 
-interface OnboardingScreenProps {
+interface SplashScreenProps {
   navigation: any;
 }
 
-export function OnboardingScreen({ navigation }: OnboardingScreenProps) {
+export function SplashScreen({ navigation }: SplashScreenProps) {
+  const { loading, isAuthenticated } = useAuth();
+
   useEffect(() => {
+    if (loading) return;
+
     const timer = setTimeout(() => {
-      navigation.navigate("Login");
-    }, 2500);
+      if (isAuthenticated) {
+        navigation.replace("Login");
+      } else {
+        navigation.replace("Login");
+      }
+    }, 800);
 
     return () => clearTimeout(timer);
-  }, [navigation]);
+  }, [loading, isAuthenticated, navigation]);
 
   return (
     <View style={[commonStyles.container, styles.container]}>
