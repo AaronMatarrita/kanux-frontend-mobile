@@ -1,11 +1,12 @@
 export const colors = {
   // Primary
-  primary: "#22c55e",
+  primary: "#0D3662",
   primaryLight: "#dcfce7",
   primaryDark: "#16a34a",
 
   // Kanux Green
   emerald600: "#16a34a",
+  success: "#10b981",
 
   // Neutral
   white: "#ffffff",
@@ -22,24 +23,31 @@ export const colors = {
   gray900: "#111827",
 
   // Status
-  success: "#10b981",
   warning: "#f59e0b",
   error: "#ef4444",
   info: "#3b82f6",
 
+  // UI Elements
+  text: "#111827",
+  muted: "#9ca3af",
+  background: "#f9fafb",
+  surface: "#ffffff",
+  border: "#e5e7eb",
+  inputBg: "rgba(255,255,255,0.1)",
+
   // Semantic
-  text: {
+  textColors: {
     primary: "#111827",
     secondary: "#6b7280",
     tertiary: "#9ca3af",
     inverted: "#ffffff",
   },
-  background: {
+  backgrounds: {
     primary: "#ffffff",
     secondary: "#f9fafb",
     tertiary: "#f3f4f6",
   },
-  border: {
+  borders: {
     primary: "#e5e7eb",
     secondary: "#d1d5db",
   },

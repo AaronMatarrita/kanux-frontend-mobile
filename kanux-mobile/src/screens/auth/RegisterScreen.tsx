@@ -13,7 +13,7 @@ const RegisterScreen: React.FC = () => {
 const styles = StyleSheet.create({
   title: {
     ...typography.h1,
-    color: colors.text.primary,
+    color: colors.text,
   },
 });
 
