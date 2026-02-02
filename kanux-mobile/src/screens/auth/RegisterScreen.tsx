@@ -74,7 +74,7 @@ export default function RegisterScreen({ navigation }: Props) {
         title="Crear cuenta"
         onPress={() => console.log("Registro pendiente")}
         variant="success"
-        style={{ marginTop: 14 }}
+        style={{ marginTop: 24 }}
       />
 
       <AuthFooter

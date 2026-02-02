@@ -92,7 +92,7 @@ export default function LoginScreen({ navigation }: Props) {
         onPress={handleSubmit}
         disabled={!canSubmit}
         variant="success"
-        style={{ marginTop: 18 }}
+        style={{ marginTop: 24 }}
       />
 
       <AuthFooter

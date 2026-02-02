@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     textAlign: "center",
     marginTop: 6,
-    marginBottom: 14,
+    marginBottom: 20,
   },
 
   dividerRow: {

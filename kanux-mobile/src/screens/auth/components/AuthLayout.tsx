@@ -20,7 +20,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <SvgUri uri={logoUri} width={180} height={52} />
       </View>
 
-      <View style={styles.panel}>{children}</View>
+      <View style={styles.panel}>
+        <View style={styles.content}>{children}</View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -43,6 +45,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: 22,
     paddingTop: 28,
+    paddingBottom: 40,
     borderTopLeftRadius: 90,
+  },
+
+  content: {
+    flex: 1,
+    gap: 12,
   },
 });

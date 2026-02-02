@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   footerRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 18,
+    marginTop: 24,
   },
   footerText: {
     color: colors.white,
