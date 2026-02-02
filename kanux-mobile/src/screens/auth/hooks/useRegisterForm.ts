@@ -1,44 +1,46 @@
 import { useCallback, useMemo, useState } from "react";
+import { authService } from "@services/auth.service";
 
 type RegisterValues = {
-  name: string;
   email: string;
   password: string;
-  confirmPassword: string;
 };
 
 type RegisterErrors = {
-  name?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
+  submit?: string;
 };
 
 type UseRegisterFormParams = {
-  onSubmit?: (values: RegisterValues) => Promise<void> | void;
+  onSuccess?: (data: any) => void;
+  onError?: (error: string) => void;
 };
 
-export function useRegisterForm({ onSubmit }: UseRegisterFormParams = {}) {
-  const [name, setName] = useState("");
+export function useRegisterForm({
+  onSuccess,
+  onError,
+}: UseRegisterFormParams = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({
-    name: false,
     email: false,
     password: false,
     confirmPassword: false,
   });
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string>();
 
   const errors = useMemo<RegisterErrors>(() => {
     const next: RegisterErrors = {};
 
-    if (!name.trim()) next.name = "Ingresá tu nombre";
     if (!email.trim()) next.email = "Ingresá tu correo";
     else if (!/^\S+@\S+\.\S+$/.test(email)) next.email = "Correo inválido";
+
     if (!password) next.password = "Ingresá tu contraseña";
     else if (password.length < 8) next.password = "Al menos 8 caracteres";
     else if (!(/[A-Z]/.test(password) && /[a-z]/.test(password)))
@@ -49,55 +51,49 @@ export function useRegisterForm({ onSubmit }: UseRegisterFormParams = {}) {
       next.confirmPassword = "Las contraseñas no coinciden";
 
     return next;
-  }, [name, email, password, confirmPassword]);
+  }, [email, password, confirmPassword]);
 
   const canSubmit =
-    !errors.name &&
-    !errors.email &&
-    !errors.password &&
-    !errors.confirmPassword &&
-    !loading;
+    !errors.email && !errors.password && !errors.confirmPassword && !loading;
 
   const handleSubmit = useCallback(async () => {
     setHasSubmitted(true);
+    setSubmitError(undefined);
 
-    if (
-      errors.name ||
-      errors.email ||
-      errors.password ||
-      errors.confirmPassword
-    )
-      return;
+    if (errors.email || errors.password || errors.confirmPassword) return;
 
     if (!canSubmit) return;
 
     setLoading(true);
     try {
-      await onSubmit?.({
-        name: name.trim(),
+      const response = await authService.preRegister({
         email: email.trim(),
         password,
         confirmPassword,
+        userType: "talent",
       });
+      onSuccess?.(response);
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error al registrarse";
+      setSubmitError(errorMessage);
+      onError?.(errorMessage);
     } finally {
       setLoading(false);
     }
   }, [
     canSubmit,
     email,
-    errors.confirmPassword,
     errors.email,
-    errors.name,
     errors.password,
-    name,
-    onSubmit,
+    errors.confirmPassword,
     password,
     confirmPassword,
+    onSuccess,
+    onError,
   ]);
-
-  const onBlurName = useCallback(() => {
-    setTouched((prev) => ({ ...prev, name: true }));
-  }, []);
 
   const onBlurEmail = useCallback(() => {
     setTouched((prev) => ({ ...prev, email: true }));
@@ -111,7 +107,6 @@ export function useRegisterForm({ onSubmit }: UseRegisterFormParams = {}) {
     setTouched((prev) => ({ ...prev, confirmPassword: true }));
   }, []);
 
-  const nameError = touched.name || hasSubmitted ? errors.name : undefined;
   const emailError = touched.email || hasSubmitted ? errors.email : undefined;
   const passwordError =
     touched.password || hasSubmitted ? errors.password : undefined;
@@ -121,8 +116,7 @@ export function useRegisterForm({ onSubmit }: UseRegisterFormParams = {}) {
       : undefined;
 
   return {
-    values: { name, email, password, confirmPassword },
-    setName,
+    values: { email, password, confirmPassword },
     setEmail,
     setPassword,
     setConfirmPassword,
@@ -133,16 +127,16 @@ export function useRegisterForm({ onSubmit }: UseRegisterFormParams = {}) {
     errors,
     canSubmit,
 
-    nameError,
     emailError,
     passwordError,
     confirmPasswordError,
 
-    onBlurName,
     onBlurEmail,
     onBlurPassword,
     onBlurConfirmPassword,
 
     handleSubmit,
+    submitError,
+    setSubmitError,
   };
 }

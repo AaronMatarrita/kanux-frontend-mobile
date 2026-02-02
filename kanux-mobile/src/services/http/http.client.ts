@@ -28,12 +28,12 @@ const resolveBaseUrl = () => {
     return normalizeBaseUrl(globalUrl);
   }
 
-  if (Constants.isDevice) {
-    const deviceUrl = process.env.EXPO_PUBLIC_API_URL_DEVICE;
-    if (deviceUrl) {
-      return normalizeBaseUrl(deviceUrl);
-    }
+  const deviceUrl = process.env.EXPO_PUBLIC_API_URL_DEVICE;
+  if (deviceUrl && Platform.OS !== "web") {
+    return normalizeBaseUrl(deviceUrl);
+  }
 
+  if (Constants.isDevice) {
     const hostUri =
       Constants.expoConfig?.hostUri ||
       (Constants as { hostUri?: string }).hostUri ||

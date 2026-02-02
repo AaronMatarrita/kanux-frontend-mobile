@@ -1,18 +1,48 @@
-import React, { useState, useMemo } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import React, { useMemo, useEffect } from "react";
+import { View, StyleSheet, Text, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Lock, Mail, User } from "lucide-react-native";
+import { Lock, Mail } from "lucide-react-native";
 import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
 import { AuthLayout, AuthHeader, AuthFooter } from "./components";
+import { useRegisterForm } from "./hooks/useRegisterForm";
 
 type Props = NativeStackScreenProps<any, "Register">;
 
 export default function RegisterScreen({ navigation }: Props) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const {
+    values: { email, password, confirmPassword },
+    setEmail,
+    setPassword,
+    setConfirmPassword,
+    loading,
+    canSubmit,
+    passwordError,
+    confirmPasswordError,
+    emailError,
+    onBlurEmail,
+    onBlurPassword,
+    onBlurConfirmPassword,
+    handleSubmit,
+    submitError,
+    setSubmitError,
+  } = useRegisterForm({
+    onSuccess: (data) => {
+      // El usuario ha sido pre-registrado exitosamente
+      Alert.alert("Éxito", "Cuenta creada. Continúa con tu perfil.");
+      // Aquí podrías navegar a la siguiente pantalla de onboarding
+    },
+    onError: (error) => {
+      Alert.alert("Error", error);
+    },
+  });
+
+  useEffect(() => {
+    if (submitError) {
+      Alert.alert("Error", submitError);
+      setSubmitError(undefined);
+    }
+  }, [submitError, setSubmitError]);
 
   const checks = useMemo(() => {
     const p = password ?? "";
@@ -30,36 +60,34 @@ export default function RegisterScreen({ navigation }: Props) {
       />
 
       <TextField
-        value={name}
-        onChangeText={setName}
-        placeholder="Tu nombre"
-        autoCapitalize="words"
-        leftIcon={User}
-      />
-
-      <TextField
         value={email}
         onChangeText={setEmail}
+        onBlur={onBlurEmail}
         placeholder="Correo electrónico"
         keyboardType="email-address"
         autoCapitalize="none"
         leftIcon={Mail}
+        error={emailError}
       />
 
       <TextField
         value={password}
         onChangeText={setPassword}
+        onBlur={onBlurPassword}
         placeholder="Ingresa tu contraseña"
         secureTextEntry
         leftIcon={Lock}
+        error={passwordError}
       />
 
       <TextField
         value={confirmPassword}
         onChangeText={setConfirmPassword}
+        onBlur={onBlurConfirmPassword}
         placeholder="Confirma tu contraseña"
         secureTextEntry
         leftIcon={Lock}
+        error={confirmPasswordError}
       />
 
       <View style={styles.rules}>
@@ -72,7 +100,8 @@ export default function RegisterScreen({ navigation }: Props) {
 
       <Button
         title="Crear cuenta"
-        onPress={() => console.log("Registro pendiente")}
+        onPress={handleSubmit}
+        disabled={!canSubmit || loading}
         variant="success"
         style={{ marginTop: 24 }}
       />
