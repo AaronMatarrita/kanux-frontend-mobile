@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { colors, commonStyles } from "@theme";
+import { KanuxLogo } from "@components/KanuxLogo";
 
 interface OnboardingScreenProps {
   navigation: any;
@@ -18,10 +19,7 @@ export function OnboardingScreen({ navigation }: OnboardingScreenProps) {
   return (
     <View style={[commonStyles.container, styles.container]}>
       <View style={styles.logoContainer}>
-        <Image
-          source={require("@assets/brand/kanux.svg")}
-          style={styles.logo}
-        />
+        <KanuxLogo width={120} height={120} />
       </View>
     </View>
   );
@@ -37,10 +35,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 40,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    resizeMode: "contain",
   },
 });
