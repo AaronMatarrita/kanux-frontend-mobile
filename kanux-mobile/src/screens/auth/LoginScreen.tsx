@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SvgUri } from "react-native-svg";
@@ -9,6 +10,8 @@ import { Lock, Mail } from "lucide-react-native";
 import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
 import { useLoginForm } from "@/screens/auth/hooks/useLoginForm";
+import { authService } from "@/services";
+import { useAuth } from "@/context/AuthContext";
 
 type Props = NativeStackScreenProps<any, "Login">;
 
@@ -17,6 +20,7 @@ const logoUri = Asset.fromModule(
 ).uri;
 
 export default function LoginScreen({ navigation }: Props) {
+  const { login } = useAuth();
   const {
     values,
     setEmail,
@@ -30,11 +34,29 @@ export default function LoginScreen({ navigation }: Props) {
     handleSubmit,
   } = useLoginForm({
     onSubmit: async (payload) => {
-      console.log("login payload", payload);
-      Alert.alert(
-        "Inicio de sesión pendiente",
-        "La conexión real se implementará más adelante.",
-      );
+      try {
+        const response = await authService.login(payload);
+
+        await login({
+          isAuthenticated: true,
+          token: response.token,
+          sessionId: response.sessionId,
+          user: response.user,
+        });
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message =
+            (error.response?.data as { message?: string })?.message ||
+            "No se pudo iniciar sesión. Verificá tus credenciales.";
+          Alert.alert("Error de inicio de sesión", message);
+          return;
+        }
+
+        Alert.alert(
+          "Error de inicio de sesión",
+          "Ocurrió un error inesperado.",
+        );
+      }
     },
   });
 
@@ -126,7 +148,7 @@ const styles = StyleSheet.create({
   welcome: {
     fontSize: 34,
     fontWeight: "800",
-    color: colors.success,
+    color: "#2EAA50",
     textAlign: "center",
     marginTop: 6,
   },

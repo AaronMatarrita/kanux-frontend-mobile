@@ -26,16 +26,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadSession = async () => {
       try {
+        let sessionData: string | null = null;
+
         if (SecureStore) {
-          const sessionData = await SecureStore.getItemAsync("session");
-          if (sessionData) {
-            setSession(JSON.parse(sessionData));
-          }
-        } else {
-          const stored = await AsyncStorage.getItem("session");
-          if (stored) {
-            setSession(JSON.parse(stored));
-          }
+          sessionData = await SecureStore.getItemAsync("session");
+        }
+
+        if (!sessionData) {
+          sessionData = await AsyncStorage.getItem("session");
+        }
+
+        if (sessionData) {
+          setSession(JSON.parse(sessionData));
         }
       } catch (error) {
         console.error("Error loading session:", error);
@@ -66,9 +68,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (SecureStore) {
         await SecureStore.deleteItemAsync("session");
-      } else {
-        await AsyncStorage.removeItem("session");
       }
+
+      await AsyncStorage.removeItem("session");
 
       setSession(null);
     } catch (error) {

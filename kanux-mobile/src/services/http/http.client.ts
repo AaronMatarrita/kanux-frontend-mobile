@@ -5,8 +5,62 @@ import axios, {
 } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { handleHttpError } from "./http.errors";
+import { Platform } from "react-native";
+import Constants from "expo-constants";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+let SecureStore: any = null;
+try {
+  SecureStore = require("expo-secure-store");
+} catch (e) {
+  SecureStore = null;
+}
+
+const normalizeBaseUrl = (raw: string) => {
+  if (/^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+  return `http://${raw}`;
+};
+
+const resolveBaseUrl = () => {
+  const globalUrl = process.env.EXPO_PUBLIC_API_URL;
+  if (globalUrl) {
+    return normalizeBaseUrl(globalUrl);
+  }
+
+  if (Constants.isDevice) {
+    const deviceUrl = process.env.EXPO_PUBLIC_API_URL_DEVICE;
+    if (deviceUrl) {
+      return normalizeBaseUrl(deviceUrl);
+    }
+
+    const hostUri =
+      Constants.expoConfig?.hostUri ||
+      (Constants as { hostUri?: string }).hostUri ||
+      "";
+    const host = hostUri.split(":")[0];
+    if (host) {
+      return `http://${host}:3000`;
+    }
+  }
+
+  if (Platform.OS === "android") {
+    const androidEmulatorUrl = process.env.EXPO_PUBLIC_API_URL_ANDROID_EMULATOR;
+    if (androidEmulatorUrl) {
+      return normalizeBaseUrl(androidEmulatorUrl);
+    }
+    return "http://10.0.2.2:3000";
+  }
+
+  const iosSimulatorUrl = process.env.EXPO_PUBLIC_API_URL_IOS_SIMULATOR;
+  if (iosSimulatorUrl) {
+    return normalizeBaseUrl(iosSimulatorUrl);
+  }
+
+  return "http://localhost:3000";
+};
+
+const API_URL = resolveBaseUrl();
 
 export const httpClient: AxiosInstance = axios.create({
   baseURL: API_URL,
@@ -19,14 +73,20 @@ export const httpClient: AxiosInstance = axios.create({
 /**
  * Request Interceptor
  * Adds JWT token to headers if available.
- * Nota: Usa async/await para trabajar con AsyncStorage en React Native
  */
 
 httpClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     try {
-      // Obtener sesión de AsyncStorage (funciona en iOS, Android y web)
-      const sessionData = await AsyncStorage.getItem("session");
+      let sessionData: string | null = null;
+
+      if (SecureStore) {
+        sessionData = await SecureStore.getItemAsync("session");
+      }
+
+      if (!sessionData) {
+        sessionData = await AsyncStorage.getItem("session");
+      }
 
       if (sessionData) {
         try {
