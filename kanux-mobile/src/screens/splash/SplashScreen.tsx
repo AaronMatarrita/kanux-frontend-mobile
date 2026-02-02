@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
-import { View, StyleSheet } from "react-native";
-import { colors, commonStyles } from "@theme";
-import { KanuxLogo } from "@components/KanuxLogo";
+import React, { useEffect, useRef } from "react";
+import { Animated, Easing, StyleSheet, View } from "react-native";
+import { commonStyles } from "@theme";
 import { useAuth } from "@context/AuthContext";
+import { AnimatedLogo, AnimatedText } from "./components";
 
 interface SplashScreenProps {
   navigation: any;
@@ -11,38 +11,61 @@ interface SplashScreenProps {
 export function SplashScreen({ navigation }: SplashScreenProps) {
   const { loading, isAuthenticated } = useAuth();
 
+  const containerOpacity = useRef(new Animated.Value(1)).current;
+  const bgOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const bgIn = Animated.timing(bgOpacity, {
+      toValue: 1,
+      duration: 520,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    });
+
+    Animated.sequence([bgIn, Animated.delay(80)]).start();
+  }, [bgOpacity]);
+
   useEffect(() => {
     if (loading) return;
 
-    const timer = setTimeout(() => {
-      if (isAuthenticated) {
-        navigation.replace("Login");
-      } else {
-        navigation.replace("Login");
-      }
-    }, 800);
+    const t = setTimeout(() => {
+      Animated.timing(containerOpacity, {
+        toValue: 0,
+        duration: 320,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }).start(() => {
+        if (!isAuthenticated) navigation.replace("Login");
+      });
+    }, 3200);
 
-    return () => clearTimeout(timer);
-  }, [loading, isAuthenticated, navigation]);
+    return () => clearTimeout(t);
+  }, [loading, isAuthenticated, navigation, containerOpacity]);
 
   return (
-    <View style={[commonStyles.container, styles.container]}>
-      <View style={styles.logoContainer}>
-        <KanuxLogo width={120} height={120} />
+    <Animated.View
+      style={[
+        commonStyles.container,
+        styles.container,
+        { opacity: containerOpacity },
+      ]}
+    >
+      <View style={styles.content}>
+        <AnimatedLogo />
+
+        <AnimatedText />
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.primary,
     justifyContent: "center",
     alignItems: "center",
   },
-  logoContainer: {
-    alignItems: "center",
+  content: {
     justifyContent: "center",
-    paddingVertical: 40,
+    alignItems: "center",
   },
 });
