@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { AuthNavigator } from "@/app/AuthNavigator";
-import { MainNavigator } from "@/app/MainNavigator";
+import { AuthNavigator } from "@app/AuthNavigator";
+import { MainNavigator } from "@app/MainNavigator";
 
 const IS_AUTHENTICATED = true;
 
