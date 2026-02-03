@@ -45,16 +45,24 @@ export const authService = {
     data: PreRegisterRequest,
   ): Promise<PreRegisterResponse> => {
     const deviceId = await getDeviceId();
-    const res = await httpClient.post<PreRegisterResponse>(
-      "/auth/pre-register",
-      { ...data, deviceId },
-    );
+    const endpoint = "/auth/pre-register";
+    const baseUrl = httpClient.defaults.baseURL || "";
+    const fullUrl = `${baseUrl.replace(/\/$/, "")}${endpoint}`;
+    console.log(`[auth] POST ${fullUrl}`);
+    const res = await httpClient.post<PreRegisterResponse>(endpoint, {
+      ...data,
+      deviceId,
+    });
     return res.data;
   },
 
   login: async (data: LoginRequest): Promise<LoginResponse> => {
     const deviceId = await getDeviceId();
-    const res = await httpClient.post<LoginResponse>("/auth/login", {
+    const endpoint = "/auth/login";
+    const baseUrl = httpClient.defaults.baseURL || "";
+    const fullUrl = `${baseUrl.replace(/\/$/, "")}${endpoint}`;
+    console.log(`[auth] POST ${fullUrl}`);
+    const res = await httpClient.post<LoginResponse>(endpoint, {
       ...data,
       deviceId,
     });

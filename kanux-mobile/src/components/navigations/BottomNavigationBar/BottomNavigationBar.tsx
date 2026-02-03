@@ -55,7 +55,7 @@ const BottomNavigationBar: React.FC<BottomTabBarProps> = ({
           >
             <Icon
               size={24}
-              color={isFocused ? colors.primary : colors.gray400}
+              color={isFocused ? colors.primaryDark : colors.gray400}
               strokeWidth={1.5}
             />
             <Text style={[styles.label, isFocused && styles.activeLabel]}>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.white,
     borderTopWidth: 1,
-    borderTopColor: colors.border.primary,
+    borderTopColor: colors.border,
     paddingVertical: spacing.sm,
     paddingBottom: spacing.md,
   },
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   activeLabel: {
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: "600" as const,
   },
 });
