@@ -4,6 +4,7 @@ export type TabNavigatorParamList = {
   Challenges: undefined;
   Messages: undefined;
   Profile: undefined;
+  Skills:undefined;
 };
 
 export type RootNavigatorParamList = {

@@ -5,13 +5,13 @@ import { spacing } from "./spacing";
 export const commonStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.backgrounds.primary,
   },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.backgrounds.primary,
   },
   row: {
     flexDirection: "row",

@@ -12,6 +12,7 @@ import FeedScreen from "@screens/feed/FeedScreen";
 import ChallengesScreen from "@screens/challenges/ChallengesScreen";
 import MessagesScreen from "@screens/messages/MessagesScreen";
 import ProfileScreen from "@screens/profile/ProfileScreen";
+import SkillsScreen from "@/screens/skills/SkillsScreen";
 
 // Components
 import BottomNavigationBar from "@components/navigations/BottomNavigationBar";
@@ -31,6 +32,7 @@ const TabNavigator: React.FC = () => {
       <Tab.Screen name="Feed" component={FeedScreen} />
       <Tab.Screen name="Challenges" component={ChallengesScreen} />
       <Tab.Screen name="Messages" component={MessagesScreen} />
+      <Tab.Screen name="Skills" component={SkillsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
