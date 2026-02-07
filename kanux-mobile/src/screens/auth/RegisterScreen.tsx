@@ -28,9 +28,7 @@ export default function RegisterScreen({ navigation }: Props) {
     setSubmitError,
   } = useRegisterForm({
     onSuccess: (data) => {
-      // El usuario ha sido pre-registrado exitosamente
       Alert.alert("Éxito", "Cuenta creada. Continúa con tu perfil.");
-      // Aquí podrías navegar a la siguiente pantalla de onboarding
     },
     onError: (error) => {
       Alert.alert("Error", error);
