@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useSkills } from "./hooks/useSkills";
+import { SkillCategoryCard } from "./components/SkillCategoryCard";
 import { Tabs } from "@/components/ui/Tabs";
 import { typography, colors, commonStyles, spacing } from "@/theme";
 
 const SkillsScreen: React.FC = () => {
   const { activeTab, setActiveTab, tabs, groupedSkillsData } = useSkills();
 
+  const tabSelect = activeTab as keyof typeof groupedSkillsData;
   return (
     <View style={commonStyles.container}>
 
@@ -25,7 +27,17 @@ const SkillsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/*categories simulated*/}
-        <Text>Aqui van las cartas de skills</Text>
+        {groupedSkillsData.length > 0 ? (
+          groupedSkillsData.map((item) => (
+            <SkillCategoryCard
+              key={item.category}
+              categoryName={item.category}
+              skills={item.skills} // item.skills es ProcessedSkill[]
+            />
+          ))
+        ) : (
+          <Text>No se encontraron habilidades en esta categoría.</Text>
+        )}
       </ScrollView>
 
     </View>

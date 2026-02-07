@@ -1,40 +1,47 @@
 import { useState, useEffect, useMemo } from "react";
 import { Skill, profilesService } from "@/services/profiles.service";
 
-interface GroupedSkills {
+// skill processed
+export interface ProcessedSkill {
+  id:string|number;
+  name: string;
+  progress: number;
+}
+// category with skill
+export interface GroupedSkills {
   category: string;
-  skills: { name: string; progress: number }[];
+  skills: ProcessedSkill[];
 }
 
 export function useSkills() {
-  const [activeTab, setActiveTab] = useState("technical");
+  const [activeTab, setActiveTab] = useState<string>("technical");
   const [loading, setLoading] = useState<boolean>(false);
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
-  const [error,setError] = useState<string|null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const getSkills = async () => {
+  const fetchSkill = async () => {
     try {
       setLoading(true);
       const data = await profilesService.getMySkills();
       setAllSkills(data);
-    } catch (error) {
+    } catch (err) {
       setError("Ocurrió un error al cargar tus habilidades.");
     } finally {
       setLoading(false);
     }
   };
   useEffect(() => {
-    getSkills();
-  }, [allSkills]);
+    fetchSkill();
+  }, []);
 
-  // process skills
-  const groupedSkillsData = useMemo(() => {
+  // typed groups
+  const groupedSkillsData = useMemo((): GroupedSkills[] => {
     const filtered = allSkills.filter((s) => {
       const isSoft = s.category?.type_category === "soft";
       return activeTab === "soft" ? isSoft : !isSoft;
     });
 
-    const groups: { [key: string]: GroupedSkills } = {};
+    const groups: Record<string, GroupedSkills> = {};
 
     filtered.forEach((skill) => {
       const catName = skill.category?.name || "Otras";
@@ -50,6 +57,7 @@ export function useSkills() {
       };
 
       groups[catName].skills.push({
+        id: skill.id,
         name: skill.name,
         progress: progressMap[skill.level || "beginner"],
       });
@@ -63,15 +71,13 @@ export function useSkills() {
     { id: "soft", label: "Habilidades blandas" },
   ];
 
-  // return hooks
   return {
-    
     loading,
-    groupedSkillsData,
+    groupedSkillsData, 
     error,
     tabs,
     activeTab,
     setActiveTab,
-    refreshSkills: getSkills
+    refreshSkills: fetchSkill
   };
 }
