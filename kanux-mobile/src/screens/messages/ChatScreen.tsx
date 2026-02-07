@@ -1,4 +1,3 @@
-// screens/ChatScreen.tsx
 import React, { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -82,7 +81,6 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
     } catch (error) {
       console.error("Error sending message:", error);
 
-      // ❌ Quita el mensaje optimista si falla
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       setError("Failed to send message. Please try again.");
