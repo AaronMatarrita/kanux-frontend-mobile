@@ -81,7 +81,6 @@ export const messagesService = {
    */
   getUserConversations: async (): Promise<Conversation[]> => {
     const res = await httpClient.get<Conversation[]>("/messages/conversations");
-   console.log("Fetched conversations:", res.data);
     return res.data;
   },
 

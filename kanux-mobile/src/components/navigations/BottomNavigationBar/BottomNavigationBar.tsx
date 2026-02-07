@@ -1,12 +1,18 @@
-import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Keyboard,
+} from "react-native";
 import {
   Home,
   LayoutList,
   Trophy,
   MessageCircle,
   User,
-  Medal
+  Medal,
 } from "lucide-react-native";
 import { colors, spacing, typography } from "@theme";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -25,6 +31,25 @@ const BottomNavigationBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  if (keyboardVisible) {
+    return null;
+  }
   return (
     <View style={styles.container}>
       {state.routes.map((route, index) => {

@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from "react-native";
+
 export type TabNavigatorParamList = {
   Home: undefined;
   Feed: undefined;
@@ -11,4 +13,14 @@ export type RootNavigatorParamList = {
   Auth: undefined;
   Main: undefined;
   Onboarding: undefined;
+};
+
+export type MessagesStackParamList = {
+  MessagesList: undefined;
+  Chat: {
+    conversationId: string;
+    conversationName: string;
+    conversationAvatar?: ImageSourcePropType;
+    companyId?: string;
+  };
 };

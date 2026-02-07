@@ -18,6 +18,7 @@ interface MessageItemProps {
   avatar?: ImageSourcePropType;
   isLast?: boolean;
   onPress?: () => void;
+  isLastMessageFromUser?: boolean;
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({
@@ -28,6 +29,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
   avatar,
   isLast = false,
   onPress,
+  isLastMessageFromUser = false,
 }) => (
   <TouchableOpacity
     style={styles.container}
@@ -35,7 +37,10 @@ const MessageItem: React.FC<MessageItemProps> = ({
     onPress={onPress}
   >
     <View style={styles.content}>
-      <Avatar source={avatar} />
+      <View style={styles.avatarContainer}>
+        <Avatar source={avatar} />
+        {unreadCount > 0 && <View style={styles.unreadDot} />}
+      </View>
 
       <View style={styles.textContainer}>
         <View style={styles.header}>
@@ -46,13 +51,18 @@ const MessageItem: React.FC<MessageItemProps> = ({
         </View>
 
         <View style={styles.messageContainer}>
-          <Text style={styles.message} numberOfLines={2}>
+          <Text
+            style={[
+              styles.message,
+              unreadCount > 0 && styles.unreadMessage,
+              isLastMessageFromUser && styles.userMessage,
+            ]}
+            numberOfLines={2}
+          >
             {message}
           </Text>
           {unreadCount > 0 && <Badge count={unreadCount} />}
         </View>
-
-        <Text style={styles.lastMessage}>Last message</Text>
       </View>
     </View>
   </TouchableOpacity>
@@ -66,6 +76,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 16,
     paddingVertical: 12,
+    alignItems: "center",
+  },
+  avatarContainer: {
+    position: "relative",
+    marginRight: 12,
+  },
+  unreadDot: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.primary,
+    borderWidth: 2,
+    borderColor: colors.surface,
   },
   textContainer: {
     flex: 1,
@@ -94,7 +120,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 4,
   },
   message: {
     ...typography.body,
@@ -104,10 +129,13 @@ const styles = StyleSheet.create({
     marginRight: 8,
     lineHeight: 18,
   },
-  lastMessage: {
-    ...typography.caption,
-    fontSize: 11,
+  unreadMessage: {
+    fontWeight: "600",
+    color: colors.textColors.primary,
+  },
+  userMessage: {
     color: colors.textColors.tertiary,
+    fontStyle: "italic",
   },
 });
 
