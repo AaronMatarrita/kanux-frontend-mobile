@@ -22,3 +22,7 @@ export interface Message {
   created_at: string;
   is_read: boolean;
 }
+export interface ConversationMessagesResponse {
+  conversation_id: string;
+  messages: Message[];
+}

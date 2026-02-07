@@ -7,6 +7,7 @@ export const colors = {
   // Kanux Green
   emerald600: "#16a34a",
   success: "#10b981",
+  message: "#00c950",
 
   // Neutral
   white: "#ffffff",

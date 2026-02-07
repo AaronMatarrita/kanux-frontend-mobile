@@ -22,29 +22,66 @@ import {
   getConversationAvatar,
   formatTime,
   getUnreadCount,
+  getMessagePreview,
 } from "./utils/conversation";
 import { Conversation } from "./types/message";
 import AppIcon from "@/components/messages/appIcon";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { MessagesStackParamList } from "@navigation";
+
+type NavigationProp = NativeStackNavigationProp<
+  MessagesStackParamList,
+  "MessagesList"
+>;
 
 const MessagesScreen: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation<NavigationProp>();
 
   const loadConversations = async () => {
     try {
       setError(null);
       setLoading(true);
       const data = await messagesService.getUserConversations();
-      setConversations(data);
+
+      const sortedConversations = data.sort((a, b) => {
+        const aUnread = getUnreadCount(a);
+        const bUnread = getUnreadCount(b);
+
+        if (aUnread !== bUnread) {
+          return bUnread - aUnread;
+        }
+
+        const aDate = getLatestMessageDate(a);
+        const bDate = getLatestMessageDate(b);
+
+        return bDate.getTime() - aDate.getTime();
+      });
+
+      setConversations(sortedConversations);
     } catch (error) {
       console.error("Error loading conversations:", error);
       setError("No se pudieron cargar las conversaciones. Intenta nuevamente.");
-      setConversations([]); 
+      setConversations([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getLatestMessageDate = (conversation: Conversation): Date => {
+    if (conversation.last_message_at) {
+      return new Date(conversation.last_message_at);
+    }
+
+    if (conversation.last_message?.created_at) {
+      return new Date(conversation.last_message.created_at);
+    }
+
+    return new Date(0);
   };
 
   useEffect(() => {
@@ -57,33 +94,43 @@ const MessagesScreen: React.FC = () => {
     setRefreshing(false);
   };
 
+  const navigateToChat = (conversation: Conversation) => {
+    navigation.navigate("Chat", {
+      conversationId: conversation.id,
+      conversationName: getConversationName(conversation),
+      conversationAvatar: getConversationAvatar(conversation),
+      companyId: conversation.company?.id,
+    });
+  };
+
   const renderItem = ({
     item,
     index,
   }: {
     item: Conversation;
     index: number;
-  }) => (
-    <View>
-      <MessageItem
-        name={getConversationName(item)}
-        message={item.last_message?.content ?? "Inicia conversación"}
-        time={formatTime(item.last_message_at)}
-        unreadCount={getUnreadCount(item)}
-        avatar={getConversationAvatar(item)}
-        onPress={() => console.log("Conversation:", item)}
-      />
-      {index < conversations.length - 1 && <Separator withMargin />}
-    </View>
-  );
+  }) => {
+    const isLastMessageFromUser = item.last_message?.sender_type === "Talento";
+
+    return (
+      <View>
+        <MessageItem
+          name={getConversationName(item)}
+          message={getMessagePreview(item)}
+          time={formatTime(item.last_message_at)}
+          unreadCount={getUnreadCount(item)}
+          avatar={getConversationAvatar(item)}
+          isLastMessageFromUser={isLastMessageFromUser}
+          onPress={() => navigateToChat(item)}
+        />
+        {index < conversations.length - 1 && <Separator withMargin />}
+      </View>
+    );
+  };
 
   const renderError = () => (
     <View style={styles.errorContainer}>
-      <AppIcon
-        name="alert-circle-outline"
-        size={48}
-        color={colors.gray400}
-      />
+      <AppIcon name="alert-circle-outline" size={48} color={colors.gray400} />
       <Text style={styles.errorText}>{error}</Text>
       <TouchableOpacity
         style={styles.retryButton}
@@ -104,18 +151,21 @@ const MessagesScreen: React.FC = () => {
 
   const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
-      <AppIcon
-        name="chatbubble-outline"
-        size={64}
-        color={colors.gray300}
-       
-      />
+      <AppIcon name="chatbubble-outline" size={64} color={colors.gray300} />
       <Text style={styles.emptyTitle}>No hay conversaciones</Text>
       <Text style={styles.emptyText}>
-        Inicia una nueva conversación para comenzar a chatear
+        Inicia una conversación con una compañía para comenzar a chatear
       </Text>
     </View>
   );
+
+  const handleSearchPress = () => {
+    console.log("Buscar compañías");
+  };
+
+  const handleAddPress = () => {
+    console.log("Nueva conversación");
+  };
 
   return (
     <View style={[commonStyles.container, styles.container]}>
@@ -126,11 +176,7 @@ const MessagesScreen: React.FC = () => {
       <Header
         title="Chats"
         leftIcon={
-          <AppIcon
-            name="search"
-            size={24}
-            color={colors.textColors.inverted}
-          />
+          <AppIcon name="search" size={24} color={colors.textColors.inverted} />
         }
         rightIcon={
           <AppIcon
@@ -139,6 +185,8 @@ const MessagesScreen: React.FC = () => {
             color={colors.textColors.inverted}
           />
         }
+        onLeftPress={handleSearchPress}
+        onRightPress={handleAddPress}
       />
 
       {loading && !refreshing ? (
@@ -200,9 +248,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingHorizontal: 32,
   },
-  errorIcon: {
-    marginBottom: 16,
-  },
   errorText: {
     fontSize: 16,
     color: colors.gray700,
@@ -230,10 +275,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 32,
-  },
-  emptyIcon: {
-    marginBottom: 16,
-    opacity: 0.5,
   },
   emptyTitle: {
     fontSize: 18,

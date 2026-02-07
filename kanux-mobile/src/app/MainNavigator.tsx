@@ -5,12 +5,11 @@ import type {
   TabNavigatorParamList,
   RootNavigatorParamList,
 } from "@navigation";
-
+import { MessagesNavigator } from "../screens/messages/navigations/MessageNavigations";
 // Screens
 import HomeScreen from "@screens/home/HomeScreen";
 import FeedScreen from "@screens/feed/FeedScreen";
 import ChallengesScreen from "@screens/challenges/ChallengesScreen";
-import MessagesScreen from "@screens/messages/MessagesScreen";
 import ProfileScreen from "@screens/profile/ProfileScreen";
 import SkillsScreen from "@/screens/skills/SkillsScreen";
 
@@ -25,13 +24,14 @@ const TabNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        tabBarHideOnKeyboard: true,
       }}
       tabBar={(props) => <BottomNavigationBar {...props} />}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Feed" component={FeedScreen} />
       <Tab.Screen name="Challenges" component={ChallengesScreen} />
-      <Tab.Screen name="Messages" component={MessagesScreen} />
+      <Tab.Screen name="Messages" component={MessagesNavigator} />
       <Tab.Screen name="Skills" component={SkillsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
