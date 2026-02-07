@@ -1,4 +1,3 @@
-// components/messages/ChatHeader.tsx
 import React from "react";
 import {
   View,
