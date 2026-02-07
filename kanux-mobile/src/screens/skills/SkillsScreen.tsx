@@ -1,28 +1,64 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { useSkills } from "./hooks/useSkills";
+import { Tabs } from "@/components/ui/Tabs";
+import { typography, colors, commonStyles, spacing } from "@/theme";
 
-export function SkillsScreen() {
+const SkillsScreen: React.FC = () => {
+  const { activeTab, setActiveTab, tabs, groupedSkillsData } = useSkills();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Habilidades</Text>
-      <Text style={styles.subtitle}>Vista Habilidades</Text>
+    <View style={commonStyles.container}>
+
+      {/* header*/}
+      <View style={styles.header}>
+        <Text style={styles.title}>Habilidades</Text>
+        <Text style={styles.subtitle}>Vista Habilidades</Text>
+        <View style={styles.tabContainer}>
+          <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        </View>
+      </View>
+
+      {/* scroll */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/*categories simulated*/}
+        <Text>Aqui van las cartas de skills</Text>
+      </ScrollView>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  header: {
+    paddingTop: 60, // notch space
+    paddingHorizontal: spacing.lg,
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.backgrounds.primary,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
+    ...typography.h1,
+    color: colors.text,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#666",
+    ...typography.body,
+    color: colors.gray500,
+    marginBottom: spacing.md,
+  },
+  tabContainer: {
+    marginBottom: spacing.md,
+  },
+  scroll: {
+    flex: 1, // use all screen
+  },
+  scrollContent: {
+    // right, left padding
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl, //button space
   },
 });
+
+export default SkillsScreen;

@@ -6,6 +6,7 @@ import {
   Trophy,
   MessageCircle,
   User,
+  Medal
 } from "lucide-react-native";
 import { colors, spacing, typography } from "@theme";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -16,6 +17,7 @@ const TABS = [
   { name: "Challenges", label: "Challenges", Icon: Trophy },
   { name: "Messages", label: "Chat", Icon: MessageCircle },
   { name: "Profile", label: "Profile", Icon: User },
+  { name: "Skills", label: "Skills", Icon: Medal },
 ];
 
 const BottomNavigationBar: React.FC<BottomTabBarProps> = ({
