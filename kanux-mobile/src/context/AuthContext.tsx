@@ -23,6 +23,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const clearPersistedSession = async () => {
+    if (SecureStore) {
+      await SecureStore.deleteItemAsync("session");
+    }
+    await AsyncStorage.removeItem("session");
+  };
+
+  const decodeJwtPayload = (token: string) => {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+
+    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = payload.padEnd(Math.ceil(payload.length / 4) * 4, "=");
+
+    try {
+      if (typeof globalThis.atob === "function") {
+        return JSON.parse(globalThis.atob(padded)) as { exp?: number };
+      }
+      if (typeof Buffer !== "undefined") {
+        return JSON.parse(Buffer.from(padded, "base64").toString("utf8")) as {
+          exp?: number;
+        };
+      }
+    } catch (error) {
+      console.error("Error decoding JWT payload:", error);
+    }
+
+    return null;
+  };
+
+  const isTokenValid = (token?: string) => {
+    if (!token) return false;
+    const payload = decodeJwtPayload(token);
+    if (!payload?.exp) return false;
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp > now;
+  };
+
+  const isTalentSession = (sessionData?: Session | null) => {
+    return sessionData?.user?.userType === "talent";
+  };
+
   useEffect(() => {
     const loadSession = async () => {
       try {
@@ -37,7 +79,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         if (sessionData) {
-          setSession(JSON.parse(sessionData));
+          const parsed = JSON.parse(sessionData) as Session;
+          if (isTokenValid(parsed?.token) && isTalentSession(parsed)) {
+            setSession(parsed);
+          } else {
+            await clearPersistedSession();
+            setSession(null);
+          }
         }
       } catch (error) {
         console.error("Error loading session:", error);
@@ -66,11 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try {
-      if (SecureStore) {
-        await SecureStore.deleteItemAsync("session");
-      }
-
-      await AsyncStorage.removeItem("session");
+      await clearPersistedSession();
 
       setSession(null);
     } catch (error) {
@@ -78,7 +122,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const isAuthenticated = session?.isAuthenticated || false;
+  const isAuthenticated = Boolean(
+    session?.isAuthenticated && session?.token && isTalentSession(session),
+  );
 
   return (
     <AuthContext.Provider

@@ -15,6 +15,36 @@ try {
   SecureStore = null;
 }
 
+const loadStoredSession = async () => {
+  let sessionData: string | null = null;
+
+  if (SecureStore) {
+    sessionData = await SecureStore.getItemAsync("session");
+  }
+
+  if (!sessionData) {
+    sessionData = await AsyncStorage.getItem("session");
+  }
+
+  if (!sessionData) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(sessionData) as { token?: string } | null;
+  } catch (error) {
+    console.error("Error parsing session data:", error);
+    return null;
+  }
+};
+
+const clearStoredSession = async () => {
+  if (SecureStore) {
+    await SecureStore.deleteItemAsync("session");
+  }
+  await AsyncStorage.removeItem("session");
+};
+
 const normalizeBaseUrl = (raw: string) => {
   if (/^https?:\/\//i.test(raw)) {
     return raw;
@@ -78,25 +108,9 @@ export const httpClient: AxiosInstance = axios.create({
 httpClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     try {
-      let sessionData: string | null = null;
-
-      if (SecureStore) {
-        sessionData = await SecureStore.getItemAsync("session");
-      }
-
-      if (!sessionData) {
-        sessionData = await AsyncStorage.getItem("session");
-      }
-
-      if (sessionData) {
-        try {
-          const session = JSON.parse(sessionData);
-          if (session?.token) {
-            config.headers.Authorization = `Bearer ${session.token}`;
-          }
-        } catch (error) {
-          console.error("Error parsing session data:", error);
-        }
+      const session = await loadStoredSession();
+      if (session?.token && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${session.token}`;
       }
     } catch (error) {
       console.error("Error accessing AsyncStorage:", error);
@@ -114,6 +128,11 @@ httpClient.interceptors.request.use(
 httpClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      clearStoredSession().catch((clearError) => {
+        console.error("Error clearing session:", clearError);
+      });
+    }
     handleHttpError(error);
     return Promise.reject(error);
   },

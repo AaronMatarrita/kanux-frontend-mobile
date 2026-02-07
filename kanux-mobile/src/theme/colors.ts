@@ -30,7 +30,7 @@ export const colors = {
   // UI Elements
   text: "#111827",
   muted: "#9ca3af",
-  background: "#f9fafb",
+  background: "#ffffff",
   surface: "#ffffff",
   border: "#e5e7eb",
   inputBg: "rgba(255,255,255,0.1)",
@@ -44,8 +44,8 @@ export const colors = {
   },
   backgrounds: {
     primary: "#ffffff",
-    secondary: "#f9fafb",
-    tertiary: "#f3f4f6",
+    secondary: "#ffffff",
+    tertiary: "#ffffff",
   },
   borders: {
     primary: "#e5e7eb",
