@@ -1,14 +1,25 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
+
+// hooks
 import { useSkills } from "./hooks/useSkills";
+//components
 import { SkillCategoryCard } from "./components/SkillCategoryCard";
 import { Tabs } from "@/components/ui/Tabs";
-import { typography, colors, commonStyles, spacing } from "@/theme";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/messages";
 
+//styles
+import { typography, colors, commonStyles, spacing } from "@/theme";
+
+// navigation
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { TabNavigatorParamList } from "@/types/navigation";
+
 const SkillsScreen: React.FC = () => {
   const { activeTab, setActiveTab, tabs, groupedSkillsData } = useSkills();
-  
+  const navigation = useNavigation<NativeStackNavigationProp<TabNavigatorParamList>>();
+
   return (
     <View style={commonStyles.container}>
       <Header title={"Habilidades"} />
@@ -33,8 +44,10 @@ const SkillsScreen: React.FC = () => {
         ) : (
           <EmptyState
             title="Aún no has agregado habilidades."
-            description="Completa tu perfil."
+            description="Parece que tu perfil aún está en crecimiento. Agrega tus habilidades para que las empresas te encuentren."
             iconName="SearchX"
+            buttonTitle="Completa tu perfil"
+            onButtonPress={() => navigation.navigate('Profile')}
           />
         )}
       </ScrollView>
