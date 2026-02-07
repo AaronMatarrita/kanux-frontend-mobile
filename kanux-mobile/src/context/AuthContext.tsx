@@ -61,6 +61,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return payload.exp > now;
   };
 
+  const isTalentSession = (sessionData?: Session | null) => {
+    return sessionData?.user?.userType === "talent";
+  };
+
   useEffect(() => {
     const loadSession = async () => {
       try {
@@ -76,7 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (sessionData) {
           const parsed = JSON.parse(sessionData) as Session;
-          if (isTokenValid(parsed?.token)) {
+          if (isTokenValid(parsed?.token) && isTalentSession(parsed)) {
             setSession(parsed);
           } else {
             await clearPersistedSession();
@@ -118,7 +122,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const isAuthenticated = Boolean(session?.isAuthenticated && session?.token);
+  const isAuthenticated = Boolean(
+    session?.isAuthenticated && session?.token && isTalentSession(session),
+  );
 
   return (
     <AuthContext.Provider

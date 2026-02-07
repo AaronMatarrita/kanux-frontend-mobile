@@ -32,6 +32,14 @@ export default function LoginScreen({ navigation }: Props) {
       try {
         const response = await authService.login(payload);
 
+        if (response.user.userType !== "talent") {
+          Alert.alert(
+            "Acceso restringido",
+            "Solo usuarios de tipo talent pueden ingresar.",
+          );
+          return;
+        }
+
         await login({
           isAuthenticated: true,
           token: response.token,

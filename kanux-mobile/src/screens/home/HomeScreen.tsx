@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.h1,
-    color: colors.text.primary,
+    color: colors.textColors.primary,
     textAlign: "center",
     marginBottom: 18,
   },
@@ -62,17 +62,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: colors.text.primary,
+    color: colors.textColors.primary,
     marginBottom: 8,
   },
   label: {
     fontSize: 12,
-    color: colors.muted,
+    color: colors.textColors.tertiary,
     marginTop: 8,
   },
   value: {
     fontSize: 14,
-    color: colors.text.primary,
+    color: colors.textColors.primary,
     marginTop: 2,
   },
   logoutButton: {
