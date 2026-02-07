@@ -1,25 +1,31 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
+
+// hooks
 import { useSkills } from "./hooks/useSkills";
+//components
 import { SkillCategoryCard } from "./components/SkillCategoryCard";
 import { Tabs } from "@/components/ui/Tabs";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Header } from "@/components/messages";
+
+//styles
 import { typography, colors, commonStyles, spacing } from "@/theme";
+
+// navigation
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { TabNavigatorParamList } from "@/types/navigation";
 
 const SkillsScreen: React.FC = () => {
   const { activeTab, setActiveTab, tabs, groupedSkillsData } = useSkills();
+  const navigation = useNavigation<NativeStackNavigationProp<TabNavigatorParamList>>();
 
-  const tabSelect = activeTab as keyof typeof groupedSkillsData;
   return (
     <View style={commonStyles.container}>
-
-      {/* header*/}
-      <View style={styles.header}>
-        <Text style={styles.title}>Habilidades</Text>
-        <Text style={styles.subtitle}>Vista Habilidades</Text>
-        <View style={styles.tabContainer}>
-          <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-        </View>
+      <Header title={"Habilidades"} />
+      <View style={styles.tabContainer}>
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       </View>
-
       {/* scroll */}
       <ScrollView
         style={styles.scroll}
@@ -36,7 +42,13 @@ const SkillsScreen: React.FC = () => {
             />
           ))
         ) : (
-          <Text>No se encontraron habilidades en esta categoría.</Text>
+          <EmptyState
+            title="Aún no has agregado habilidades."
+            description="Parece que tu perfil aún está en crecimiento. Agrega tus habilidades para que las empresas te encuentren."
+            iconName="SearchX"
+            buttonTitle="Completa tu perfil"
+            onButtonPress={() => navigation.navigate('Profile')}
+          />
         )}
       </ScrollView>
 
@@ -61,6 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   tabContainer: {
+    marginTop: spacing.xxl,
     marginBottom: spacing.md,
   },
   scroll: {
