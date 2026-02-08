@@ -34,7 +34,8 @@ type Props = {
   visible: boolean;
   profile: ProfileData;
   onClose: () => void;
-  onSave: (skills: Skill[]) => void;
+  onSave: (skills: Skill[]) => Promise<boolean>;
+  isSaving?: boolean;
 };
 
 export const EditSkillsInfoModal: React.FC<Props> = ({
@@ -42,6 +43,7 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
   profile,
   onClose,
   onSave,
+  isSaving = false,
 }) => {
   const form = useEditSkillsForm(profile);
   const [editModal, setEditModal] = useState<EditModalState>(null);
@@ -51,7 +53,7 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
     if (!visible) setEditModal(null);
   }, [visible]);
 
-  const onPressSave = () => {
+  const onPressSave = async () => {
     if (!form.validate()) return;
 
     const next: Skill[] = form.skills.map((s) => ({
@@ -59,10 +61,12 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
       name: s.name,
       level: s.level,
       category: s.category,
+      categoryId: s.categoryId,
       verified: true,
     }));
 
-    onSave(next);
+    const saved = await onSave(next);
+    if (saved) onClose();
   };
 
   const editInitial = useMemo(() => {
@@ -106,7 +110,14 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
         visible={visible}
         title="Editar habilidades"
         onClose={onClose}
-        footer={<ModalFooterActions onCancel={onClose} onSave={onPressSave} />}
+        footer={
+          <ModalFooterActions
+            onCancel={onClose}
+            onSave={onPressSave}
+            saveLabel={isSaving ? "Guardando..." : "Guardar"}
+            disabled={isSaving}
+          />
+        }
       >
         <Text style={styles.helper}>
           Agrega tus habilidades organizadas por categoría.

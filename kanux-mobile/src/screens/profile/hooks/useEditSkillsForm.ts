@@ -6,6 +6,7 @@ export type SkillDraft = {
   category: Skill["category"];
   name: string;
   level: NonNullable<Skill["level"]>;
+  categoryId?: string;
   verified?: boolean;
 };
 
@@ -24,6 +25,7 @@ export function useEditSkillsForm(profile: ProfileData) {
         category: s.category,
         name: s.name,
         level: (s.level ?? DEFAULT_LEVEL) as NonNullable<Skill["level"]>,
+        categoryId: s.categoryId,
         verified: s.verified ?? true,
       })),
     [profile],
@@ -48,7 +50,6 @@ export function useEditSkillsForm(profile: ProfileData) {
         level: DEFAULT_LEVEL,
         verified: true,
         ...initial,
-        id,
       },
     ]);
     return id;

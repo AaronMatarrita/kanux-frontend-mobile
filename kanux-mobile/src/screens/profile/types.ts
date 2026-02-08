@@ -12,6 +12,7 @@ export interface Skill {
   name: string;
   level?: "Beginner" | "Intermediate" | "Advanced" | "Expert";
   category: "Technical" | "Soft" | "Other";
+  categoryId?: string;
   verified?: boolean;
 }
 

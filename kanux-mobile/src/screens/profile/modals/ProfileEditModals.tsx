@@ -41,7 +41,8 @@ type Props = {
   isSavingAbout?: boolean;
   onSaveBasicInfo: (payload: BasicInfoPayload) => Promise<boolean>;
   isSavingBasicInfo?: boolean;
-  onSaveSkills: (skills: Skill[]) => void;
+  onSaveSkills: (skills: Skill[]) => Promise<boolean>;
+  isSavingSkills?: boolean;
   languageCatalog?: { id: string; label: string }[];
 };
 
@@ -55,6 +56,7 @@ export const ProfileEditModals: React.FC<Props> = ({
   onSaveBasicInfo,
   isSavingBasicInfo = false,
   onSaveSkills,
+  isSavingSkills = false,
   languageCatalog,
 }) => {
   return (
@@ -94,10 +96,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         visible={modalKey === "edit_skills"}
         profile={profile}
         onClose={onClose}
-        onSave={(skills) => {
-          onSaveSkills(skills);
-          onClose();
-        }}
+        onSave={(skills) => onSaveSkills(skills)}
+        isSaving={isSavingSkills}
       />
     </>
   );

@@ -9,8 +9,14 @@ import {
   profilesService,
   type Catalogs,
   type Language as ApiLanguage,
+  type Skill as ApiSkill,
 } from "@/services/profiles.service";
-import type { LanguageLevel, OpportunityStatus, ProfileData } from "../types";
+import type {
+  LanguageLevel,
+  OpportunityStatus,
+  ProfileData,
+  Skill as ProfileSkill,
+} from "../types";
 
 type SetProfile = Dispatch<SetStateAction<ProfileData | null>>;
 
@@ -19,6 +25,8 @@ type UseProfileEditsReturn = {
   saveAbout: (about: string) => Promise<boolean>;
   isSavingBasicInfo: boolean;
   saveBasicInfo: (payload: BasicInfoPayload) => Promise<boolean>;
+  isSavingSkills: boolean;
+  saveSkills: (skills: ProfileSkill[]) => Promise<boolean>;
 };
 
 type BasicInfoPayload = {
@@ -118,12 +126,88 @@ const mapLanguageLevelToProfile = (level?: string): LanguageLevel => {
   return "Intermediate";
 };
 
+const mapSkillLevelToApi = (level?: ProfileSkill["level"]) => {
+  if (!level) return undefined;
+  const normalized = normalizeText(level);
+  if (normalized.includes("beginner")) return "beginner" as const;
+  if (normalized.includes("intermediate")) return "intermediate" as const;
+  if (normalized.includes("advanced")) return "advanced" as const;
+  if (normalized.includes("expert")) return "expert" as const;
+  return undefined;
+};
+
+const mapSkillLevelToProfile = (level?: string): ProfileSkill["level"] => {
+  const normalized = normalizeText(level);
+  if (normalized.includes("beginner")) return "Beginner";
+  if (normalized.includes("intermediate")) return "Intermediate";
+  if (normalized.includes("advanced")) return "Advanced";
+  if (normalized.includes("expert")) return "Expert";
+  return undefined;
+};
+
+const mapSkillCategory = (skill: ApiSkill): ProfileSkill["category"] => {
+  const normalized = normalizeText(
+    skill.category?.type_category ?? skill.category?.name,
+  );
+  if (normalized.includes("soft") || normalized.includes("bland"))
+    return "Soft";
+  if (normalized.includes("tech") || normalized.includes("tecn")) {
+    return "Technical";
+  }
+  return "Other";
+};
+
+const mapCategoryId = (
+  category: ProfileSkill["category"],
+  catalogs?: Catalogs | null,
+) => {
+  const options = catalogs?.categories ?? [];
+  const normalized = (value?: string) => normalizeText(value);
+
+  if (category === "Soft") {
+    return options.find((item) => {
+      const name = normalized(item.name);
+      return name.includes("soft") || name.includes("bland");
+    })?.id;
+  }
+
+  if (category === "Technical") {
+    return options.find((item) => {
+      const name = normalized(item.name);
+      return name.includes("tech") || name.includes("tecn");
+    })?.id;
+  }
+
+  return options.find((item) => {
+    const name = normalized(item.name);
+    return (
+      name.includes("other") ||
+      name.includes("otro") ||
+      name.includes("soporte")
+    );
+  })?.id;
+};
+
 const mapApiLanguage = (language: ApiLanguage) => ({
   id: language.id,
   name: language.languages?.name ?? "",
   level: mapLanguageLevelToProfile(language.level),
   languageId: language.id_languages ?? language.languages?.id,
 });
+
+const mapApiSkill = (
+  skill: ApiSkill,
+  fallback?: ProfileSkill,
+): ProfileSkill => {
+  return {
+    id: String(skill.id),
+    name: skill.name ?? fallback?.name ?? "",
+    level: mapSkillLevelToProfile(skill.level) ?? fallback?.level,
+    category: mapSkillCategory(skill) ?? fallback?.category ?? "Other",
+    categoryId: skill.id_category ?? skill.category?.id ?? fallback?.categoryId,
+    verified: true,
+  };
+};
 
 export function useProfileEdits(
   profile: ProfileData | null,
@@ -132,6 +216,7 @@ export function useProfileEdits(
 ): UseProfileEditsReturn {
   const [isSavingAbout, setIsSavingAbout] = useState(false);
   const [isSavingBasicInfo, setIsSavingBasicInfo] = useState(false);
+  const [isSavingSkills, setIsSavingSkills] = useState(false);
 
   const saveAbout = useCallback(
     async (about: string) => {
@@ -319,10 +404,120 @@ export function useProfileEdits(
     [catalogs, isSavingBasicInfo, profile, setProfile],
   );
 
+  const saveSkills = useCallback(
+    async (skills: ProfileSkill[]) => {
+      if (isSavingSkills || !profile) return false;
+
+      const currentSkills = profile.skills ?? [];
+      const toCreate = skills.filter((s) => s.id.startsWith("tmp-"));
+      const toDelete = currentSkills.filter(
+        (orig) => !skills.some((curr) => curr.id === orig.id),
+      );
+      const toUpdate = skills.filter((curr) => {
+        if (curr.id.startsWith("tmp-")) return false;
+        const original = currentSkills.find((orig) => orig.id === curr.id);
+        if (!original) return false;
+        return (
+          original.name !== curr.name ||
+          original.level !== curr.level ||
+          original.category !== curr.category ||
+          original.categoryId !== curr.categoryId
+        );
+      });
+
+      setIsSavingSkills(true);
+      try {
+        const [createdSkills, updatedSkills] = await Promise.all([
+          Promise.all(
+            toCreate.map((skill) =>
+              profilesService.addSkill({
+                category_id:
+                  mapCategoryId(skill.category, catalogs) ??
+                  skill.categoryId ??
+                  "",
+                name: skill.name,
+                level: mapSkillLevelToApi(skill.level),
+              }),
+            ),
+          ),
+          Promise.all(
+            toUpdate.map((skill) =>
+              profilesService.updateSkill(skill.id, {
+                category_id:
+                  mapCategoryId(skill.category, catalogs) ?? skill.categoryId,
+                name: skill.name,
+                level: mapSkillLevelToApi(skill.level),
+              }),
+            ),
+          ),
+        ]);
+
+        await Promise.all(
+          toDelete.map((skill) => profilesService.deleteSkill(skill.id)),
+        );
+
+        const createdMap = new Map<string, ProfileSkill>();
+        toCreate.forEach((draft, index) => {
+          const mapped = createdSkills[index]
+            ? mapApiSkill(createdSkills[index], draft)
+            : undefined;
+          if (mapped) createdMap.set(draft.id, mapped);
+        });
+
+        const updatedMap = new Map(
+          updatedSkills.map((skill) => [
+            String(skill.id),
+            mapApiSkill(
+              skill,
+              skills.find((s) => s.id === String(skill.id)),
+            ),
+          ]),
+        );
+
+        const nextSkills = skills.flatMap((draft) => {
+          if (draft.id.startsWith("tmp-")) {
+            const created = createdMap.get(draft.id);
+            return created ? [created] : [draft];
+          }
+
+          const updated = updatedMap.get(draft.id);
+          return updated ? [updated] : [draft];
+        });
+
+        setProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                skills: nextSkills,
+                summary: {
+                  ...prev.summary,
+                  skillsVerified: nextSkills.length,
+                },
+              }
+            : prev,
+        );
+
+        return true;
+      } catch (saveError) {
+        const message =
+          saveError instanceof Error
+            ? saveError.message
+            : "No se pudieron actualizar las habilidades.";
+        Alert.alert("Error", message);
+        return false;
+      } finally {
+        setIsSavingSkills(false);
+      }
+    },
+    [catalogs, isSavingSkills, profile, setProfile],
+  );
+
   return {
     isSavingAbout,
     saveAbout,
     isSavingBasicInfo,
     saveBasicInfo,
+    isSavingSkills,
+    saveSkills,
   };
 }

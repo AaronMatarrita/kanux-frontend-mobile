@@ -131,6 +131,7 @@ const mapSkills = (skills?: ApiSkill[]): Skill[] =>
     name: skill.name,
     level: mapSkillLevel(skill.level),
     category: mapSkillCategory(skill),
+    categoryId: skill.id_category ?? skill.category?.id,
     verified: true,
   }));
 

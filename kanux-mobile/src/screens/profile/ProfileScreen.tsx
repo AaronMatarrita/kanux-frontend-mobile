@@ -28,8 +28,14 @@ export default function ProfileScreen() {
     error,
     reload,
   } = useTalentProfile();
-  const { isSavingAbout, saveAbout, isSavingBasicInfo, saveBasicInfo } =
-    useProfileEdits(profile, catalogs, setProfile);
+  const {
+    isSavingAbout,
+    saveAbout,
+    isSavingBasicInfo,
+    saveBasicInfo,
+    isSavingSkills,
+    saveSkills,
+  } = useProfileEdits(profile, catalogs, setProfile);
 
   const modal = useModalState();
 
@@ -128,7 +134,8 @@ export default function ProfileScreen() {
         isSavingAbout={isSavingAbout}
         onSaveBasicInfo={(payload) => saveBasicInfo(payload)}
         isSavingBasicInfo={isSavingBasicInfo}
-        onSaveSkills={(skills) => setProfile((p) => (p ? { ...p, skills } : p))}
+        onSaveSkills={(skills) => saveSkills(skills)}
+        isSavingSkills={isSavingSkills}
         languageCatalog={languageCatalog}
       />
     </>
