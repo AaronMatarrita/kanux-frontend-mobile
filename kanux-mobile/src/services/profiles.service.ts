@@ -190,8 +190,12 @@ export const profilesService = {
   ): Promise<TalentProfile> => {
     const formData = new FormData();
 
-    if (data.first_name) formData.append("first_name", data.first_name);
-    if (data.last_name) formData.append("last_name", data.last_name);
+    if (data.first_name !== undefined) {
+      formData.append("first_name", data.first_name);
+    }
+    if (data.last_name !== undefined) {
+      formData.append("last_name", data.last_name);
+    }
     if (data.title) formData.append("title", data.title);
     if (data.location) formData.append("location", data.location);
     if (data.experience_level)

@@ -32,7 +32,8 @@ type Props = {
     location: string;
     contacts: ProfileContact[];
   }) => void;
-  onSaveAbout: (about: string) => void;
+  onSaveAbout: (about: string) => Promise<boolean>;
+  isSavingAbout?: boolean;
   onSaveBasicInfo: (payload: BasicInfoPayload) => void;
   onSaveSkills: (skills: Skill[]) => void;
   languageCatalog?: { id: string; label: string }[];
@@ -44,6 +45,7 @@ export const ProfileEditModals: React.FC<Props> = ({
   onClose,
   onSaveHeader,
   onSaveAbout,
+  isSavingAbout = false,
   onSaveBasicInfo,
   onSaveSkills,
   languageCatalog,
@@ -66,10 +68,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         visible={modalKey === "edit_about"}
         initialAbout={profile.about ?? ""}
         onClose={onClose}
-        onSave={(next) => {
-          onSaveAbout(next);
-          onClose();
-        }}
+        onSave={(next) => onSaveAbout(next)}
+        isSaving={isSavingAbout}
       />
 
       {/* BASIC INFO */}

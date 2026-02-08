@@ -60,6 +60,8 @@ export interface ProfileBasicInfo {
 
 export interface ProfileData {
   id: string;
+  firstName?: string;
+  lastName?: string;
   avatarUrl?: string;
   completion: ProfileCompletion;
   about?: string;

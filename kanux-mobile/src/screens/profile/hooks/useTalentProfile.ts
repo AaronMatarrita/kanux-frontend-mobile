@@ -152,6 +152,8 @@ const mapProfileData = (profile: TalentProfile): ProfileData => {
 
   return {
     id: profile.id,
+    firstName: profile.first_name ?? undefined,
+    lastName: profile.last_name ?? undefined,
     avatarUrl: profile.image_url,
     completion: { percentage: profile.profile_completeness ?? 0 },
     about: profile.about ?? "",

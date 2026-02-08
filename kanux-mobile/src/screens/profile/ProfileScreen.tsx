@@ -15,11 +15,13 @@ import { SkillsSection } from "@/screens/profile/components/sections/SkillsSecti
 import { ActivitySection } from "@/screens/profile/components/sections/ActivitySection";
 
 import { useTalentProfile } from "./hooks/useTalentProfile";
+import { useProfileEdits } from "./hooks/useProfileEdits";
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"resume" | "skills" | "activity">("resume");
   const { profile, setProfile, languageCatalog, loading, error, reload } =
     useTalentProfile();
+  const { isSavingAbout, saveAbout } = useProfileEdits(profile, setProfile);
 
   const modal = useModalState();
 
@@ -114,9 +116,8 @@ export default function ProfileScreen() {
               : p,
           )
         }
-        onSaveAbout={(about: string) =>
-          setProfile((p) => (p ? { ...p, about } : p))
-        }
+        onSaveAbout={(about: string) => saveAbout(about)}
+        isSavingAbout={isSavingAbout}
         onSaveBasicInfo={(payload) =>
           setProfile((p) =>
             p
