@@ -289,7 +289,7 @@ export const profilesService = {
     id: string,
     data: UpdateLenguageRequest,
   ): Promise<Language> => {
-    const res = await httpClient.post<Language>(
+    const res = await httpClient.put<Language>(
       `/profiles/languages/me/${id}`,
       data,
     );

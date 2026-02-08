@@ -19,9 +19,17 @@ import { useProfileEdits } from "./hooks/useProfileEdits";
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"resume" | "skills" | "activity">("resume");
-  const { profile, setProfile, languageCatalog, loading, error, reload } =
-    useTalentProfile();
-  const { isSavingAbout, saveAbout } = useProfileEdits(profile, setProfile);
+  const {
+    profile,
+    setProfile,
+    catalogs,
+    languageCatalog,
+    loading,
+    error,
+    reload,
+  } = useTalentProfile();
+  const { isSavingAbout, saveAbout, isSavingBasicInfo, saveBasicInfo } =
+    useProfileEdits(profile, catalogs, setProfile);
 
   const modal = useModalState();
 
@@ -118,26 +126,8 @@ export default function ProfileScreen() {
         }
         onSaveAbout={(about: string) => saveAbout(about)}
         isSavingAbout={isSavingAbout}
-        onSaveBasicInfo={(payload) =>
-          setProfile((p) =>
-            p
-              ? {
-                  ...p,
-                  basicInfo: {
-                    ...p.basicInfo,
-                    experienceLevel: payload.experienceLevel,
-                    education: payload.education,
-                  },
-                  opportunityStatus: payload.opportunityStatus,
-                  languages: payload.languages.map((l, idx) => ({
-                    id: `local-${idx}`,
-                    name: l.name,
-                    level: l.level,
-                  })),
-                }
-              : p,
-          )
-        }
+        onSaveBasicInfo={(payload) => saveBasicInfo(payload)}
+        isSavingBasicInfo={isSavingBasicInfo}
         onSaveSkills={(skills) => setProfile((p) => (p ? { ...p, skills } : p))}
         languageCatalog={languageCatalog}
       />

@@ -17,7 +17,12 @@ type BasicInfoPayload = {
   experienceLevel: string;
   education: string;
   opportunityStatus: OpportunityStatus;
-  languages: { name: string; level: LanguageLevel }[];
+  languages: {
+    id: string;
+    name: string;
+    level: LanguageLevel;
+    languageId?: string;
+  }[];
 };
 
 type Props = {
@@ -34,7 +39,8 @@ type Props = {
   }) => void;
   onSaveAbout: (about: string) => Promise<boolean>;
   isSavingAbout?: boolean;
-  onSaveBasicInfo: (payload: BasicInfoPayload) => void;
+  onSaveBasicInfo: (payload: BasicInfoPayload) => Promise<boolean>;
+  isSavingBasicInfo?: boolean;
   onSaveSkills: (skills: Skill[]) => void;
   languageCatalog?: { id: string; label: string }[];
 };
@@ -47,6 +53,7 @@ export const ProfileEditModals: React.FC<Props> = ({
   onSaveAbout,
   isSavingAbout = false,
   onSaveBasicInfo,
+  isSavingBasicInfo = false,
   onSaveSkills,
   languageCatalog,
 }) => {
@@ -78,10 +85,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         profile={profile}
         languageCatalog={languageCatalog}
         onClose={onClose}
-        onSave={(payload) => {
-          onSaveBasicInfo(payload);
-          onClose();
-        }}
+        onSave={(payload) => onSaveBasicInfo(payload)}
+        isSaving={isSavingBasicInfo}
       />
 
       {/* SKILLS INFO */}

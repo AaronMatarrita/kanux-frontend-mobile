@@ -118,6 +118,7 @@ const mapLanguages = (languages?: ApiLanguage[]): Language[] =>
 
       return {
         id: item.id,
+        languageId: item.id_languages ?? item.languages?.id,
         name,
         level: mapLanguageLevel(item.level),
       } satisfies Language;
@@ -217,7 +218,7 @@ export function useTalentProfile() {
   const languageCatalog = useMemo(
     () =>
       catalogs?.languages.map((lang) => ({
-        id: lang.name,
+        id: lang.id,
         label: lang.name,
       })) ?? undefined,
     [catalogs],

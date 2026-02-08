@@ -33,6 +33,7 @@ export interface Language {
   id: string;
   name: string;
   level: LanguageLevel;
+  languageId?: string;
 }
 
 export interface ActivityItem {
