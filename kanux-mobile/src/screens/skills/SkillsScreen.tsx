@@ -12,13 +12,14 @@ import { Header } from "@/components/messages";
 import { typography, colors, commonStyles, spacing } from "@/theme";
 
 // navigation
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { TabNavigatorParamList } from "@/types/navigation";
 
 const SkillsScreen: React.FC = () => {
   const { activeTab, setActiveTab, tabs, groupedSkillsData } = useSkills();
-  const navigation = useNavigation<NativeStackNavigationProp<TabNavigatorParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<TabNavigatorParamList>>();
 
   return (
     <View style={commonStyles.container}>
@@ -47,14 +48,13 @@ const SkillsScreen: React.FC = () => {
             description="Parece que tu perfil aún está en crecimiento. Agrega tus habilidades para que las empresas te encuentren."
             iconName="SearchX"
             buttonTitle="Completa tu perfil"
-            onButtonPress={() => navigation.navigate('Profile')}
+            onButtonPress={() => navigation.navigate("Profile")}
           />
         )}
       </ScrollView>
-
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   header: {

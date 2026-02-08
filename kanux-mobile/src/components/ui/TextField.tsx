@@ -9,7 +9,7 @@ import {
   TextStyle,
   TextInputProps,
 } from "react-native";
-import { colors } from "@/theme/colors";
+import { colors, typography, spacing } from "@/theme";
 import { Eye, EyeOff, type LucideIcon } from "lucide-react-native";
 
 type Props = TextInputProps & {
@@ -102,17 +102,10 @@ export function TextField({
 const styles = StyleSheet.create({
   container: { marginBottom: 14 },
   label: {
-    marginBottom: 6,
-    fontSize: 13,
-    opacity: 0.9,
-  },
-  inputWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    height: 48,
+    ...typography.caption,
+    color: colors.textColors.secondary,
+    fontWeight: "700",
+    marginBottom: spacing.xs,
   },
   inputWrapMultiline: {
     height: 110,
@@ -122,9 +115,20 @@ const styles = StyleSheet.create({
   inputWrapError: {
     borderColor: "#EF4444",
   },
+  inputWrap: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   input: {
     flex: 1,
-    fontSize: 14,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    backgroundColor: "transparent",
   },
   inputMultiline: {
     textAlignVertical: "top",
