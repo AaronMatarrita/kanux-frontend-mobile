@@ -51,6 +51,22 @@ export default function ProfileScreen() {
         modalKey={modal.modal.key}
         profile={profile}
         onClose={modal.close}
+        onSaveHeader={(payload) =>
+          setProfile((p) => ({
+            ...p,
+            avatarUrl: payload.avatarUrl,
+            basicInfo: {
+              ...p.basicInfo,
+              fullName: payload.fullName,
+              headline: payload.headline,
+              location: payload.location,
+              website:
+                payload.contacts.find((c) => c.type === "Website")?.value ??
+                p.basicInfo.website,
+            },
+            contacts: payload.contacts,
+          }))
+        }
         onSaveAbout={(about: string) => setProfile((p) => ({ ...p, about }))}
         onSaveBasicInfo={(payload) =>
           setProfile((p) => ({

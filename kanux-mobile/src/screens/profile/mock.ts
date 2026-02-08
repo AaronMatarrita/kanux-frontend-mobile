@@ -19,6 +19,14 @@ export const mockProfile: ProfileData = {
 
   opportunityStatus: "FreelanceOnly",
 
+  contacts: [
+    {
+      id: "contact-website",
+      type: "Website",
+      value: "https://www.google.com/aaronmatarrita",
+    },
+  ],
+
   languages: [
     { id: "en", name: "English", level: "Intermediate" },
     { id: "es", name: "Spanish", level: "Basic" },

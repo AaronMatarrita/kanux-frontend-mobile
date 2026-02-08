@@ -5,11 +5,13 @@ import type {
   OpportunityStatus,
   LanguageLevel,
   Skill,
+  ProfileContact,
 } from "../types";
 
 import { EditAboutModal } from "./EditAboutModal";
 import { EditBasicInfoModal } from "./EditBasicInfoModal";
 import { EditSkillsInfoModal } from "./EditSkillsInfoModal";
+import { EditProfileHeaderModal } from "./EditProfileHeaderModal";
 
 type BasicInfoPayload = {
   experienceLevel: string;
@@ -23,6 +25,13 @@ type Props = {
   profile: ProfileData;
   onClose: () => void;
 
+  onSaveHeader: (payload: {
+    avatarUrl?: string;
+    fullName: string;
+    headline: string;
+    location: string;
+    contacts: ProfileContact[];
+  }) => void;
   onSaveAbout: (about: string) => void;
   onSaveBasicInfo: (payload: BasicInfoPayload) => void;
   onSaveSkills: (skills: Skill[]) => void;
@@ -33,6 +42,7 @@ export const ProfileEditModals: React.FC<Props> = ({
   modalKey,
   profile,
   onClose,
+  onSaveHeader,
   onSaveAbout,
   onSaveBasicInfo,
   onSaveSkills,
@@ -40,6 +50,17 @@ export const ProfileEditModals: React.FC<Props> = ({
 }) => {
   return (
     <>
+      {/* HEADER */}
+      <EditProfileHeaderModal
+        visible={modalKey === "edit_header"}
+        profile={profile}
+        onClose={onClose}
+        onSave={(payload) => {
+          onSaveHeader(payload);
+          onClose();
+        }}
+      />
+
       {/* ABOUT */}
       <EditAboutModal
         visible={modalKey === "edit_about"}

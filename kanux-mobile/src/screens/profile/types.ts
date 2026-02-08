@@ -14,6 +14,21 @@ export interface Skill {
   category: "Technical" | "Soft" | "Other";
   verified?: boolean;
 }
+
+export type ContactType =
+  | "Phone"
+  | "WhatsApp"
+  | "LinkedIn"
+  | "GitHub"
+  | "Twitter"
+  | "Website"
+  | "Other";
+
+export interface ProfileContact {
+  id: string;
+  type: ContactType;
+  value: string;
+}
 export interface Language {
   id: string;
   name: string;
@@ -55,6 +70,7 @@ export interface ProfileData {
   languages: Language[];
   skills: Skill[];
   activity: ActivityItem[];
+  contacts?: ProfileContact[];
 
   summary: {
     completedChallenges: number;

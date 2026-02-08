@@ -11,6 +11,10 @@ type Props = {
 };
 
 export default function ProfileHeader({ profile, onEditPress }: Props) {
+  const website =
+    profile.basicInfo.website ??
+    profile.contacts?.find((c) => c.type === "Website")?.value;
+
   return (
     <View style={styles.wrapper}>
       <Card variant="shadow" padding="lg" style={styles.card}>
@@ -23,13 +27,13 @@ export default function ProfileHeader({ profile, onEditPress }: Props) {
           style={styles.avatar}
         />
 
-        <Text style={styles.name}>Aaron Matarrita</Text>
+        <Text style={styles.name}>{profile.basicInfo.fullName}</Text>
 
-        <Text style={styles.role}>
-          Frontend Developer · Backend Developer · FullStack
-        </Text>
+        {!!profile.basicInfo.headline && (
+          <Text style={styles.role}>{profile.basicInfo.headline}</Text>
+        )}
 
-        <Text style={styles.link}>https://example.com</Text>
+        {!!website && <Text style={styles.link}>{website}</Text>}
       </Card>
     </View>
   );
