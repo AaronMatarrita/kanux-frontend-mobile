@@ -1,9 +1,9 @@
 import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
-import { colors, typography, spacing } from "@theme";
+import { Image, Text, View } from "react-native";
 import { Card } from "@/components/ui/Card";
 import { EditButton } from "@/components/ui/EditButton";
 import { ProfileData } from "../types";
+import styles from "../styles/profileHeader.styles";
 
 type Props = {
   profile: ProfileData;
@@ -34,46 +34,3 @@ export default function ProfileHeader({ profile, onEditPress }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  card: {
-    borderRadius: 16,
-  },
-
-  editWrapper: {
-    position: "absolute",
-    top: spacing.md,
-    right: spacing.md,
-    zIndex: 1,
-  },
-
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    marginBottom: spacing.md,
-    alignSelf: "center",
-    marginTop: spacing.sm,
-  },
-  name: {
-    ...typography.h3,
-    color: colors.textColors.primary,
-    textAlign: "center",
-  },
-  role: {
-    ...typography.bodySmall,
-    color: colors.textColors.secondary,
-    textAlign: "center",
-    marginTop: spacing.xs,
-  },
-  link: {
-    ...typography.caption,
-    color: colors.info,
-    marginTop: spacing.sm,
-    textAlign: "center",
-  },
-});

@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
 import { Card } from "@/components/ui/Card";
-import { colors, spacing, typography } from "@/theme";
 import { ActivityItemRow } from "../activity/ActivityItemRow";
+import styles from "../../styles/activitySection.styles";
 
 type Props = {};
 
@@ -66,24 +66,3 @@ export const ActivitySection: React.FC<Props> = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  wrapper: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xxxl,
-  },
-  card: {
-    borderRadius: 16,
-  },
-  title: {
-    ...typography.body,
-    fontWeight: "600",
-    color: colors.textColors.primary,
-    marginBottom: spacing.sm,
-  },
-  list: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-});

@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { colors, spacing, typography } from "@/theme";
+import { View, Text } from "react-native";
 import { Card } from "@/components/ui/Card";
 import { EditButton } from "@/components/ui/EditButton";
+import styles from "../../styles/aboutSection.styles";
 
 type Props = {
   onEditPress: () => void;
@@ -23,31 +23,3 @@ export const AboutSection: React.FC<Props> = ({ onEditPress }) => (
     </Card>
   </View>
 );
-
-const styles = StyleSheet.create({
-  wrapper: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  card: {
-    borderRadius: 16,
-  },
-
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: spacing.sm,
-  },
-  title: {
-    ...typography.body,
-    fontWeight: "600",
-    color: colors.textColors.primary,
-  },
-
-  text: {
-    ...typography.bodySmall,
-    color: colors.textColors.secondary,
-  },
-});
