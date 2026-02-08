@@ -20,7 +20,7 @@ type Props = {
 
 const TRASH_SIZE = 32;
 const GAP = spacing.sm;
-const LABEL_HEIGHT = 18; // debe coincidir aprox con el label del SelectField
+const LABEL_HEIGHT = 18;
 
 export const LanguageRow: React.FC<Props> = ({
   onPickLanguage,
@@ -47,7 +47,6 @@ export const LanguageRow: React.FC<Props> = ({
         />
       </View>
 
-      {/* Trash alineado al input (no al label) */}
       <View style={styles.trashWrapper}>
         <View style={styles.labelSpacer} />
         <Pressable onPress={onRemove} hitSlop={10} style={styles.trash}>

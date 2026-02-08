@@ -1,5 +1,14 @@
 import React from "react";
-import { Modal, View, Text, StyleSheet, Pressable } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { X } from "lucide-react-native";
 import { colors, spacing, typography, commonStyles } from "@/theme";
 
@@ -25,28 +34,32 @@ export const BaseModal: React.FC<Props> = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      {/* Backdrop */}
       <Pressable style={styles.backdrop} onPress={onClose} />
 
-      {/* Container */}
-      <View style={styles.center}>
+      <KeyboardAvoidingView
+        style={styles.center}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <View style={[styles.card, commonStyles.shadow]}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
-
             <Pressable onPress={onClose} hitSlop={10} style={styles.closeBtn}>
               <X size={18} color={colors.textColors.secondary} />
             </Pressable>
           </View>
-
           {/* Body */}
-          <View style={styles.body}>{children}</View>
-
+          <ScrollView
+            style={styles.body}
+            contentContainerStyle={styles.bodyContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollView>
           {/* Footer */}
           {!!footer && <View style={styles.footer}>{footer}</View>}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -67,6 +80,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.border,
+    maxHeight: "85%",
   },
   header: {
     paddingHorizontal: spacing.lg,
@@ -90,11 +104,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   body: {
+    flexGrow: 0,
+  },
+  bodyContent: {
     padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   footer: {
     padding: spacing.lg,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+    backgroundColor: colors.white,
   },
 });

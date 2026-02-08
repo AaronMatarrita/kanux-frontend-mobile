@@ -1,9 +1,15 @@
 import React from "react";
 import { ModalKey } from "@/screens/profile/hooks/useModalState";
-import type { ProfileData, OpportunityStatus, LanguageLevel } from "../types";
+import type {
+  ProfileData,
+  OpportunityStatus,
+  LanguageLevel,
+  Skill,
+} from "../types";
 
 import { EditAboutModal } from "./EditAboutModal";
 import { EditBasicInfoModal } from "./EditBasicInfoModal";
+import { EditSkillsInfoModal } from "./EditSkillsInfoModal";
 
 type BasicInfoPayload = {
   experienceLevel: string;
@@ -19,7 +25,7 @@ type Props = {
 
   onSaveAbout: (about: string) => void;
   onSaveBasicInfo: (payload: BasicInfoPayload) => void;
-
+  onSaveSkills: (skills: Skill[]) => void;
   languageCatalog?: { id: string; label: string }[];
 };
 
@@ -29,6 +35,7 @@ export const ProfileEditModals: React.FC<Props> = ({
   onClose,
   onSaveAbout,
   onSaveBasicInfo,
+  onSaveSkills,
   languageCatalog,
 }) => {
   return (
@@ -52,6 +59,17 @@ export const ProfileEditModals: React.FC<Props> = ({
         onClose={onClose}
         onSave={(payload) => {
           onSaveBasicInfo(payload);
+          onClose();
+        }}
+      />
+
+      {/* SKILLS INFO */}
+      <EditSkillsInfoModal
+        visible={modalKey === "edit_skills"}
+        profile={profile}
+        onClose={onClose}
+        onSave={(skills) => {
+          onSaveSkills(skills);
           onClose();
         }}
       />

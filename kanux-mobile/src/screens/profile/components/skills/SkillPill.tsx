@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   text: {
-    ...typography.uiSmall,
+    ...typography.captionSmall,
     color: colors.white,
     flex: 1,
     flexShrink: 1,

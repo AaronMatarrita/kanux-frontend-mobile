@@ -14,7 +14,6 @@ export interface Skill {
   category: "Technical" | "Soft" | "Other";
   verified?: boolean;
 }
-
 export interface Language {
   id: string;
   name: string;
