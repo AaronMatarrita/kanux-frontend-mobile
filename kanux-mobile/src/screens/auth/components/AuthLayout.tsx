@@ -11,13 +11,15 @@ const logoUri = Asset.fromModule(
 
 interface AuthLayoutProps {
   children: React.ReactNode;
+  topSlot?: React.ReactNode;
 }
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({ children, topSlot }: AuthLayoutProps) {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.top}>
         <SvgUri uri={logoUri} width={180} height={52} />
+        {!!topSlot && <View style={styles.topSlot}>{topSlot}</View>}
       </View>
 
       <View style={styles.panel}>
@@ -38,6 +40,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
+  },
+  topSlot: {
+    marginTop: 16,
+    width: "100%",
+    paddingHorizontal: 22,
   },
 
   panel: {

@@ -103,13 +103,6 @@ export default function LoginScreen({ navigation }: Props) {
         style={{ marginTop: 24 }}
       />
 
-      <Button
-        title="Ir a onboarding"
-        onPress={() => navigation.navigate("CompleteProfile")}
-        variant="outline"
-        style={{ marginTop: 12 }}
-      />
-
       <AuthFooter
         text="¿No tienes cuenta?"
         linkText="Crea una"

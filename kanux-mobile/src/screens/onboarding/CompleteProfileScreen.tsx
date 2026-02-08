@@ -1,6 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
 import {
@@ -10,10 +12,13 @@ import {
 } from "./components";
 import { spacing, typography, colors } from "@theme";
 import { useCompleteProfileForm } from "./hooks/useCompleteProfileForm";
+import type { RootNavigatorParamList } from "@/types/navigation";
 
 const STEP_LABELS = ["Registro", "Datos personales", "Datos profesionales"];
 
 export default function CompleteProfileScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootNavigatorParamList>>();
   const {
     values,
     setField,
@@ -23,6 +28,8 @@ export default function CompleteProfileScreen() {
     canContinue,
     handleBack,
     handleContinue,
+    submitting,
+    submitProfile,
   } = useCompleteProfileForm();
 
   const headerSubtitle =
@@ -107,6 +114,39 @@ export default function CompleteProfileScreen() {
     },
   ];
 
+  const handlePrimaryAction = async () => {
+    if (profileStep === 0) {
+      handleContinue();
+      return;
+    }
+
+    const canSubmitStep = handleContinue();
+    if (!canSubmitStep || submitting) return;
+
+    const result = await submitProfile();
+    if (result === "session-missing") {
+      Alert.alert(
+        "Sesion requerida",
+        "No se encontro la sesion. Por favor vuelve a registrarte.",
+      );
+      return;
+    }
+
+    if (result === "error") {
+      Alert.alert(
+        "Error",
+        "No pudimos guardar tu informacion. Intenta de nuevo.",
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Perfil completado",
+      "Tu informacion fue guardada correctamente.",
+      [{ text: "Continuar", onPress: () => navigation.navigate("Main") }],
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -145,8 +185,8 @@ export default function CompleteProfileScreen() {
 
               <Button
                 title={profileStep === 0 ? "Continuar" : "Finalizar"}
-                onPress={handleContinue}
-                disabled={!canContinue}
+                onPress={handlePrimaryAction}
+                disabled={!canContinue || submitting}
                 variant="success"
                 style={styles.footerBtn}
               />
