@@ -4,6 +4,7 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import { useSkills } from "./hooks/useSkills";
 //components
 import { SkillCategoryCard } from "./components/SkillCategoryCard";
+import { SkillsSkeleton } from "./components/SkillsSkeleton";
 import { Tabs } from "@/components/ui/Tabs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "@/components/messages";
@@ -17,29 +18,39 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { TabNavigatorParamList } from "@/types/navigation";
 
 const SkillsScreen: React.FC = () => {
-  const { activeTab, setActiveTab, tabs, groupedSkillsData } = useSkills();
+  const { activeTab, setActiveTab, tabs, groupedSkillsData, loading } =
+    useSkills();
   const navigation =
     useNavigation<NativeStackNavigationProp<TabNavigatorParamList>>();
 
   return (
     <View style={commonStyles.container}>
       <Header title={"Habilidades"} />
+
       <View style={styles.tabContainer}>
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {loading ? (
+          <View style={styles.tabsSkeletonRow}>
+            <View style={styles.tabSkeleton} />
+            <View style={styles.tabSkeleton} />
+          </View>
+        ) : (
+          <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        )}
       </View>
-      {/* scroll */}
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/*categories simulated*/}
-        {groupedSkillsData.length > 0 ? (
+        {loading ? (
+          <SkillsSkeleton hideTabs />
+        ) : groupedSkillsData.length > 0 ? (
           groupedSkillsData.map((item) => (
             <SkillCategoryCard
               key={item.category}
               categoryName={item.category}
-              skills={item.skills} // item.skills es ProcessedSkill[]
+              skills={item.skills}
             />
           ))
         ) : (
@@ -58,7 +69,7 @@ const SkillsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 60, // notch space
+    paddingTop: 60,
     paddingHorizontal: spacing.lg,
     alignItems: "center",
     backgroundColor: colors.backgrounds.primary,
@@ -73,16 +84,27 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   tabContainer: {
-    marginTop: spacing.xxl,
+    marginTop: spacing.lg,
     marginBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   scroll: {
-    flex: 1, // use all screen
+    flex: 1,
   },
   scrollContent: {
-    // right, left padding
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl, //button space
+    paddingBottom: spacing.xxxl,
+    flexGrow: 1,
+  },
+  tabsSkeletonRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  tabSkeleton: {
+    flex: 1,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.gray200,
   },
 });
 
