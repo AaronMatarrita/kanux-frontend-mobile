@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import * as LucideIcons from 'lucide-react-native';
-import { colors, spacing, typography } from '@/theme';
-import { Button } from './Button';
+import React from "react";
+import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import * as LucideIcons from "lucide-react-native";
+import { colors, spacing, typography } from "@/theme";
+import { Button } from "./Button";
 
 type IconName = keyof typeof LucideIcons;
 
@@ -19,7 +19,7 @@ interface EmptyStateProps {
 export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
-  iconName = 'Inbox',
+  iconName = "Inbox",
   style,
   buttonTitle,
   onButtonPress,
@@ -31,17 +31,17 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <View style={styles.iconContainer}>
         <Icon size={48} color={colors.gray400} strokeWidth={1.5} />
       </View>
-      
+
       <Text style={[typography.h3, styles.title]}>{title}</Text>
-      
+
       <Text style={[typography.body, styles.description]}>{description}</Text>
 
       {/* call to action */}
       {buttonTitle && onButtonPress && (
-        <Button 
-          title={buttonTitle} 
-          onPress={onButtonPress} 
-          variant="outline" 
+        <Button
+          title={buttonTitle}
+          onPress={onButtonPress}
+          variant="outline"
           style={styles.button}
         />
       )}
@@ -52,8 +52,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: spacing.xl,
     marginTop: spacing.xxl,
   },
@@ -62,12 +62,12 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   title: {
-    textAlign: 'center',
+    textAlign: "center",
     color: colors.gray800,
     marginBottom: spacing.xs,
   },
   description: {
-    textAlign: 'center',
+    textAlign: "center",
     color: colors.gray500,
     lineHeight: 22,
     marginBottom: spacing.lg,
