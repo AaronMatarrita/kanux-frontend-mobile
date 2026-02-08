@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Plus, Trash2, Edit } from "lucide-react-native";
 import { BaseModal } from "@/components/ui/modals/BaseModal";
 import { ModalFooterActions } from "@/components/ui/modals/ModalFooterActions";
+import { IconButton } from "@/components/ui/IconButton";
 import { colors, spacing, typography } from "@/theme";
 import type { ProfileData, Skill } from "@/screens/profile/types";
 import { useEditSkillsForm } from "@/screens/profile/hooks/useEditSkillsForm";
@@ -145,21 +146,16 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
             </View>
 
             <View style={styles.skillActions}>
-              <Pressable
+              <IconButton
                 onPress={() => setEditModal({ mode: "edit", id: s.id })}
-                hitSlop={10}
-                style={styles.iconBtn}
+                size={32}
               >
                 <Edit size={16} color={colors.textColors.secondary} />
-              </Pressable>
+              </IconButton>
 
-              <Pressable
-                onPress={() => form.removeSkill(s.id)}
-                hitSlop={10}
-                style={styles.iconBtn}
-              >
+              <IconButton onPress={() => form.removeSkill(s.id)} size={32}>
                 <Trash2 size={16} color={colors.error} />
-              </Pressable>
+              </IconButton>
             </View>
           </View>
         ))}
@@ -255,15 +251,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-  },
-  iconBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.white,
   },
 });

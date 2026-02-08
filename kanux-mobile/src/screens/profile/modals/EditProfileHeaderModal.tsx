@@ -6,6 +6,7 @@ import { ModalFooterActions } from "@/components/ui/modals/ModalFooterActions";
 import { OptionsModal } from "@/components/ui/modals/OptionsModal";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextField } from "@/components/ui/TextField";
+import { IconButton } from "@/components/ui/IconButton";
 import { colors, spacing, typography, commonStyles } from "@/theme";
 import type { ProfileContact, ProfileData, ContactType } from "../types";
 
@@ -288,13 +289,12 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
 
               <View style={styles.trashWrapper}>
                 <View style={styles.labelSpacer} />
-                <Pressable
+                <IconButton
                   onPress={() => onRemoveContact(c.id)}
-                  hitSlop={10}
-                  style={styles.trash}
+                  size={TRASH_SIZE}
                 >
                   <Trash2 size={18} color={colors.error} />
-                </Pressable>
+                </IconButton>
               </View>
             </View>
           </View>
@@ -420,15 +420,5 @@ const styles = StyleSheet.create({
   labelSpacer: {
     height: LABEL_HEIGHT,
     marginBottom: 4,
-  },
-  trash: {
-    width: TRASH_SIZE,
-    height: TRASH_SIZE,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.white,
   },
 });

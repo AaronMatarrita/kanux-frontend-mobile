@@ -1,9 +1,10 @@
 import React from "react";
-import { View, Pressable, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Trash2 } from "lucide-react-native";
 import { colors, spacing } from "@/theme";
 import { SelectField } from "@/components/ui/SelectField";
 import { TextField } from "@/components/ui/TextField";
+import { IconButton } from "@/components/ui/IconButton";
 
 type Props = {
   categoryLabel?: string;
@@ -43,9 +44,9 @@ export const SkillRow: React.FC<Props> = ({
 
         <View style={styles.trashWrapper}>
           <View style={styles.labelSpacer} />
-          <Pressable onPress={onRemove} hitSlop={10} style={styles.trash}>
+          <IconButton onPress={onRemove} size={TRASH_SIZE}>
             <Trash2 size={18} color={colors.error} />
-          </Pressable>
+          </IconButton>
         </View>
       </View>
 
@@ -98,16 +99,6 @@ const styles = StyleSheet.create({
   labelSpacer: {
     height: LABEL_HEIGHT,
     marginBottom: 4,
-  },
-  trash: {
-    width: TRASH_SIZE,
-    height: TRASH_SIZE,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.white,
   },
   inputBlock: {
     marginBottom: spacing.sm,
