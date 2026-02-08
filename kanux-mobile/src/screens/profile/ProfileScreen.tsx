@@ -13,12 +13,7 @@ import { SkillsSection } from "@/screens/profile/components/sections/SkillsSecti
 import { ActivitySection } from "@/screens/profile/components/sections/ActivitySection";
 
 import { ProfileData } from "./types";
-
-const mockProfile: ProfileData = {
-  about:
-    "I am a Senior UI/UX Designer with 6+ years of experience crafting digital experiences...",
-  // ...lo demás mock
-} as any;
+import { mockProfile } from "./mock";
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"resume" | "skills" | "activity">("resume");
@@ -56,8 +51,22 @@ export default function ProfileScreen() {
         modalKey={modal.modal.key}
         profile={profile}
         onClose={modal.close}
-        onSaveAbout={(about: string) =>
-          setProfile((p: ProfileData) => ({ ...p, about }))
+        onSaveAbout={(about: string) => setProfile((p) => ({ ...p, about }))}
+        onSaveBasicInfo={(payload) =>
+          setProfile((p) => ({
+            ...p,
+            basicInfo: {
+              ...p.basicInfo,
+              experienceLevel: payload.experienceLevel,
+              education: payload.education,
+            },
+            opportunityStatus: payload.opportunityStatus,
+            languages: payload.languages.map((l, idx) => ({
+              id: `local-${idx}`,
+              name: l.name,
+              level: l.level,
+            })),
+          }))
         }
       />
     </>

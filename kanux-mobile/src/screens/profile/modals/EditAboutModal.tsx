@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
-import { BaseModal } from "@/components/ui/BaseModal";
-import { ModalFooterActions } from "@/components/ui/ModalFooterActions";
+import { BaseModal } from "@/components/ui/modals/BaseModal";
+import { ModalFooterActions } from "@/components/ui/modals/ModalFooterActions";
 import { colors, spacing, typography } from "@/theme";
 import { useEditAboutForm } from "@/screens/profile/hooks/useEditAboutForm";
 
