@@ -43,26 +43,6 @@ export function StepIndicator({ steps, activeIndex }: StepIndicatorProps) {
           );
         })}
       </View>
-
-      <View style={styles.labelsRow}>
-        {steps.map((label, index) => {
-          const isActive = index === activeIndex;
-
-          return (
-            <View key={`${label}-${index}`} style={styles.labelItem}>
-              <Text
-                numberOfLines={2}
-                style={[
-                  styles.stepLabel,
-                  isActive ? styles.stepLabelActive : styles.stepLabelHidden,
-                ]}
-              >
-                {label}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
     </View>
   );
 }
