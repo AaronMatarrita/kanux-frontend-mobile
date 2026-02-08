@@ -6,10 +6,13 @@ import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/Button";
 import { AuthLayout, AuthHeader, AuthFooter } from "./components";
 import { useRegisterForm } from "./hooks/useRegisterForm";
+import { useAuth } from "@/context/AuthContext";
+import type { TalentProfile } from "@/types/session.types";
 
 type Props = NativeStackScreenProps<any, "Register">;
 
 export default function RegisterScreen({ navigation }: Props) {
+  const { login } = useAuth();
   const {
     values: { email, password, confirmPassword },
     setEmail,
@@ -27,10 +30,34 @@ export default function RegisterScreen({ navigation }: Props) {
     submitError,
     setSubmitError,
   } = useRegisterForm({
-    onSuccess: (data) => {
-      // El usuario ha sido pre-registrado exitosamente
+    onSuccess: async (data) => {
+      const emptyProfile: TalentProfile = {
+        id: "",
+        id_user: data.user,
+        first_name: null,
+        last_name: null,
+        title: null,
+        bio: null,
+        location: null,
+        skills: null,
+        photo_url: null,
+        created_at: new Date().toISOString(),
+      };
+
+      await login({
+        isAuthenticated: false,
+        token: data.token,
+        sessionId: data.sessionId,
+        user: {
+          id: data.user,
+          email,
+          userType: "talent",
+          profile: emptyProfile,
+        },
+      });
+
       Alert.alert("Éxito", "Cuenta creada. Continúa con tu perfil.");
-      // Aquí podrías navegar a la siguiente pantalla de onboarding
+      navigation.replace("CompleteProfile");
     },
     onError: (error) => {
       Alert.alert("Error", error);
