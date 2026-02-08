@@ -1,13 +1,20 @@
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "@/theme/colors";
-import { spacing } from "@/theme/spacing";
-import { typography } from "@/theme/typography";
+import { colors, spacing, typography } from "@/theme";
 import { Card } from "@/components/ui/Card";
+import { EditButton } from "@/components/ui/EditButton";
 
-export const BasicInfoSection = () => (
+type Props = {
+  onEditPress: () => void;
+};
+
+export const BasicInfoSection: React.FC<Props> = ({ onEditPress }) => (
   <View style={styles.wrapper}>
     <Card variant="shadow" padding="lg" style={styles.card}>
-      <Text style={styles.title}>Información básica</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Información básica</Text>
+        <EditButton onPress={onEditPress} />
+      </View>
 
       <InfoRow label="Nivel de experiencia" value="Expert" />
       <InfoRow label="Idiomas" value="English (Intermedio), Spanish (Básico)" />
@@ -29,14 +36,22 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
   },
   card: {
-    alignItems: "flex-start",
     borderRadius: 16,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: spacing.md,
   },
   title: {
     ...typography.body,
     fontWeight: "600",
-    marginBottom: spacing.md,
+    color: colors.textColors.primary,
   },
+
   row: {
     marginBottom: spacing.sm,
   },

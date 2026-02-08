@@ -1,13 +1,21 @@
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "@/theme/colors";
-import { spacing } from "@/theme/spacing";
-import { typography } from "@/theme/typography";
+import { colors, spacing, typography } from "@/theme";
 import { Card } from "@/components/ui/Card";
+import { EditButton } from "@/components/ui/EditButton";
 
-export const AboutSection = () => (
+type Props = {
+  onEditPress: () => void;
+};
+
+export const AboutSection: React.FC<Props> = ({ onEditPress }) => (
   <View style={styles.wrapper}>
     <Card variant="shadow" padding="lg" style={styles.card}>
-      <Text style={styles.title}>Acerca de</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Acerca de</Text>
+        <EditButton onPress={onEditPress} />
+      </View>
+
       <Text style={styles.text}>
         I am a Senior UI/UX Designer with 6+ years of experience crafting
         digital experiences that are both beautiful and functional.
@@ -22,14 +30,22 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
   },
   card: {
-    alignItems: "flex-start",
     borderRadius: 16,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: spacing.sm,
   },
   title: {
     ...typography.body,
     fontWeight: "600",
-    marginBottom: spacing.sm,
+    color: colors.textColors.primary,
   },
+
   text: {
     ...typography.bodySmall,
     color: colors.textColors.secondary,

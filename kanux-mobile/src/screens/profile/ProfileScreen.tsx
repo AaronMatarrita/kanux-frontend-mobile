@@ -1,6 +1,6 @@
 import { ScrollView } from "react-native";
 import { useState } from "react";
-import { commonStyles } from "@theme";
+import { spacing } from "@theme";
 import Header from "@/components/ui/Header";
 
 import ProfileHeader from "@/screens/profile/components/ProfileHeader";
@@ -8,6 +8,8 @@ import { ProfileProgress } from "./components/ProfileProgress";
 import { ProfileTabs } from "./components/ProfileTabs";
 import { AboutSection } from "./components/sections/AboutSection";
 import { BasicInfoSection } from "./components/sections/BasicInfoSection";
+import { SkillsSection } from "./components/sections/SkillsSection";
+import { ActivitySection } from "./components/sections/ActivitySection";
 import { ProfileData } from "./types";
 
 const ProfileScreen = () => {
@@ -15,7 +17,7 @@ const ProfileScreen = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
       <Header title={"Mi Perfil"} />
       <ProfileHeader profile={profile!} onEditPress={() => {}} />
       <ProfileProgress />
@@ -23,10 +25,12 @@ const ProfileScreen = () => {
 
       {tab === "resume" && (
         <>
-          <AboutSection />
-          <BasicInfoSection />
+          <AboutSection onEditPress={() => {}} />
+          <BasicInfoSection onEditPress={() => {}} />
         </>
       )}
+      {tab === "skills" && <SkillsSection onEditPress={() => {}} />}
+      {tab === "activity" && <ActivitySection />}
     </ScrollView>
   );
 };

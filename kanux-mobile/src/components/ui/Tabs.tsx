@@ -1,17 +1,12 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
-import { typography, colors, commonStyles, spacing } from "@/theme";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { typography, colors, spacing } from "@/theme";
 
 interface Tab {
   id: string;
   label: string;
 }
+
 interface TabsProps {
   tabs: Tab[];
   activeTab: string;
@@ -21,52 +16,47 @@ interface TabsProps {
 export function Tabs({ tabs, activeTab, onTabChange }: TabsProps) {
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scroll}
-        contentContainerStyle={styles.wrapper}
-      >
-        <View style={styles.wrapper}>
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => onTabChange(tab.id)}
-                style={[styles.tab, isActive && styles.tabActive]}
+      <View style={styles.wrapper}>
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              onPress={() => onTabChange(tab.id)}
+              activeOpacity={0.8}
+              style={[styles.tab, isActive && styles.tabActive]}
+            >
+              <Text
+                style={[styles.tabText, isActive && styles.tabTextActive]}
+                numberOfLines={1}
               >
-                <Text
-                  style={[styles.tabText, isActive && styles.tabTextActive]}
-                >
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flexGrow: 0,
-  },
   container: {
     width: "100%",
     backgroundColor: "#f1f5f9",
     borderRadius: 12,
-    padding: 4,
-    alignSelf: "center",
+    padding: spacing.xs,
   },
   wrapper: {
     flexDirection: "row",
+    width: "100%",
   },
   tab: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 8,
   },
   tabActive: {
@@ -77,11 +67,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   tabText: {
-    fontSize: 14,
+    ...typography.bodySmall,
     color: "#475569",
     fontWeight: "500",
   },
   tabTextActive: {
-    color: "#fff",
+    color: colors.white,
+    fontWeight: "600",
   },
 });

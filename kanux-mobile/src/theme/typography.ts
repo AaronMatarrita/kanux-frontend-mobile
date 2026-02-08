@@ -14,6 +14,7 @@ export const typography = {
     fontWeight: "600" as const,
     lineHeight: 32,
   },
+
   body: {
     fontSize: 16,
     fontWeight: "400" as const,
@@ -24,6 +25,13 @@ export const typography = {
     fontWeight: "400" as const,
     lineHeight: 20,
   },
+
+  uiSmall: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    lineHeight: 18,
+  },
+
   caption: {
     fontSize: 12,
     fontWeight: "500" as const,
