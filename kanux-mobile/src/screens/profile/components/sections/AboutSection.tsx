@@ -5,10 +5,13 @@ import { Card } from "@/components/ui/Card";
 import { EditButton } from "@/components/ui/EditButton";
 
 type Props = {
+  about?: string;
   onEditPress: () => void;
 };
 
-export const AboutSection: React.FC<Props> = ({ onEditPress }) => {
+export const AboutSection: React.FC<Props> = ({ about, onEditPress }) => {
+  const description = about?.trim() || "Sin descripción";
+
   return (
     <View style={styles.wrapper}>
       <Card variant="shadow" padding="lg" style={styles.card}>
@@ -16,9 +19,7 @@ export const AboutSection: React.FC<Props> = ({ onEditPress }) => {
           <Text style={styles.title}>Acerca de</Text>
           <EditButton onPress={onEditPress} />
         </View>
-        <Text style={styles.text}>
-          I am a Senior UI/UX Designer with 6+ years of experience...
-        </Text>
+        <Text style={styles.text}>{description}</Text>
       </Card>
     </View>
   );

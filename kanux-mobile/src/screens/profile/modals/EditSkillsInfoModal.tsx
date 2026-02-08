@@ -15,7 +15,7 @@ type Option = { id: string; label: string };
 const CATEGORY_OPTIONS: Option[] = [
   { id: "Other", label: "Soporte" },
   { id: "Technical", label: "Tecnología" },
-  { id: "Soft", label: "Soft" },
+  { id: "Soft", label: "Blandas" },
 ];
 
 const LEVEL_OPTIONS: Option[] = [
@@ -113,7 +113,7 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
         </Text>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Skills</Text>
+          <Text style={styles.sectionTitle}>Habilidades</Text>
 
           <Pressable
             onPress={() => setEditModal({ mode: "add" })}
@@ -121,7 +121,7 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
             hitSlop={10}
           >
             <Plus size={16} color={colors.white} />
-            <Text style={styles.addText}>Add Skill</Text>
+            <Text style={styles.addText}>Agregar habilidad</Text>
           </Pressable>
         </View>
 
@@ -131,7 +131,7 @@ export const EditSkillsInfoModal: React.FC<Props> = ({
 
         {form.skills.length === 0 && (
           <Text style={styles.emptyText}>
-            Aun no hay habilidades agregadas.
+            Aún no hay habilidades agregadas.
           </Text>
         )}
 

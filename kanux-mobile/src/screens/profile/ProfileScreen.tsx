@@ -1,25 +1,50 @@
 import { ScrollView } from "react-native";
 import { useState } from "react";
 import Header from "@/components/ui/Header";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { spacing } from "@/theme";
 import { useModalState } from "./hooks/useModalState";
 import { ProfileEditModals } from "@/screens/profile/modals/ProfileEditModals";
 
 import ProfileHeader from "@/screens/profile/components/ProfileHeader";
+import { ProfileSkeleton } from "@/screens/profile/components/ProfileSkeleton";
 import { ProfileTabs } from "@/screens/profile/components/ProfileTabs";
 import { AboutSection } from "@/screens/profile/components/sections/AboutSection";
 import { BasicInfoSection } from "@/screens/profile/components/sections/BasicInfoSection";
 import { SkillsSection } from "@/screens/profile/components/sections/SkillsSection";
 import { ActivitySection } from "@/screens/profile/components/sections/ActivitySection";
 
-import { ProfileData } from "./types";
-import { mockProfile } from "./mock";
+import { useTalentProfile } from "./hooks/useTalentProfile";
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"resume" | "skills" | "activity">("resume");
-  const [profile, setProfile] = useState<ProfileData>(mockProfile);
+  const { profile, setProfile, languageCatalog, loading, error, reload } =
+    useTalentProfile();
 
   const modal = useModalState();
+
+  if (loading) {
+    return (
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
+        <Header title={"Mi Perfil"} />
+        <ProfileSkeleton />
+      </ScrollView>
+    );
+  }
+
+  if (!profile || error) {
+    return (
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Header title={"Mi Perfil"} />
+        <EmptyState
+          title="No se pudo cargar el perfil"
+          description="Revisa tu conexión e intenta de nuevo."
+          buttonTitle="Reintentar"
+          onButtonPress={reload}
+        />
+      </ScrollView>
+    );
+  }
 
   return (
     <>
@@ -35,13 +60,25 @@ export default function ProfileScreen() {
 
         {tab === "resume" && (
           <>
-            <AboutSection onEditPress={() => modal.open("edit_about")} />
-            <BasicInfoSection onEditPress={() => modal.open("edit_basic")} />
+            <AboutSection
+              about={profile.about}
+              onEditPress={() => modal.open("edit_about")}
+            />
+            <BasicInfoSection
+              experienceLevel={profile.basicInfo.experienceLevel}
+              education={profile.basicInfo.education}
+              opportunityStatus={profile.opportunityStatus}
+              languages={profile.languages}
+              onEditPress={() => modal.open("edit_basic")}
+            />
           </>
         )}
 
         {tab === "skills" && (
-          <SkillsSection onEditPress={() => modal.open("edit_skills")} />
+          <SkillsSection
+            skills={profile.skills}
+            onEditPress={() => modal.open("edit_skills")}
+          />
         )}
 
         {tab === "activity" && <ActivitySection />}
@@ -52,39 +89,50 @@ export default function ProfileScreen() {
         profile={profile}
         onClose={modal.close}
         onSaveHeader={(payload) =>
-          setProfile((p) => ({
-            ...p,
-            avatarUrl: payload.avatarUrl,
-            basicInfo: {
-              ...p.basicInfo,
-              fullName: payload.fullName,
-              headline: payload.headline,
-              location: payload.location,
-              website:
-                payload.contacts.find((c) => c.type === "Website")?.value ??
-                p.basicInfo.website,
-            },
-            contacts: payload.contacts,
-          }))
+          setProfile((p) =>
+            p
+              ? {
+                  ...p,
+                  avatarUrl: payload.avatarUrl,
+                  basicInfo: {
+                    ...p.basicInfo,
+                    fullName: payload.fullName,
+                    headline: payload.headline,
+                    location: payload.location,
+                    website:
+                      payload.contacts.find((c) => c.type === "Website")
+                        ?.value ?? p.basicInfo.website,
+                  },
+                  contacts: payload.contacts,
+                }
+              : p,
+          )
         }
-        onSaveAbout={(about: string) => setProfile((p) => ({ ...p, about }))}
+        onSaveAbout={(about: string) =>
+          setProfile((p) => (p ? { ...p, about } : p))
+        }
         onSaveBasicInfo={(payload) =>
-          setProfile((p) => ({
-            ...p,
-            basicInfo: {
-              ...p.basicInfo,
-              experienceLevel: payload.experienceLevel,
-              education: payload.education,
-            },
-            opportunityStatus: payload.opportunityStatus,
-            languages: payload.languages.map((l, idx) => ({
-              id: `local-${idx}`,
-              name: l.name,
-              level: l.level,
-            })),
-          }))
+          setProfile((p) =>
+            p
+              ? {
+                  ...p,
+                  basicInfo: {
+                    ...p.basicInfo,
+                    experienceLevel: payload.experienceLevel,
+                    education: payload.education,
+                  },
+                  opportunityStatus: payload.opportunityStatus,
+                  languages: payload.languages.map((l, idx) => ({
+                    id: `local-${idx}`,
+                    name: l.name,
+                    level: l.level,
+                  })),
+                }
+              : p,
+          )
         }
-        onSaveSkills={(skills) => setProfile((p) => ({ ...p, skills }))}
+        onSaveSkills={(skills) => setProfile((p) => (p ? { ...p, skills } : p))}
+        languageCatalog={languageCatalog}
       />
     </>
   );

@@ -13,7 +13,7 @@ type SkillDraft = {
 
 const CATEGORY_LABEL: Record<Skill["category"], string> = {
   Technical: "Tecnología",
-  Soft: "Soft",
+  Soft: "Blandas",
   Other: "Soporte",
 };
 
@@ -36,7 +36,7 @@ export const SkillsPreview: React.FC<{ skills: SkillDraft[] }> = ({
 
   return (
     <View style={styles.box}>
-      <Text style={styles.previewTitle}>Preview:</Text>
+      <Text style={styles.previewTitle}>Vista previa:</Text>
 
       {categories.map((cat) => (
         <View key={cat} style={styles.group}>

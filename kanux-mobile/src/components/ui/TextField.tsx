@@ -49,6 +49,7 @@ export function TextField({
 
       <View
         style={[
+          styles.inputWrap,
           {
             backgroundColor: palette.inputBg,
             borderColor: palette.border,
@@ -114,16 +115,20 @@ const styles = StyleSheet.create({
   inputWrapError: {
     borderColor: "#EF4444",
   },
-  input: {
+  inputWrap: {
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: 12,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "space-between",
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    backgroundColor: "transparent",
   },
   inputMultiline: {
     textAlignVertical: "top",

@@ -10,37 +10,37 @@ export const ActivitySection: React.FC<Props> = () => {
   const items = [
     {
       title: "Suma de Dos Números",
-      dateLabel: "10 d ago",
+      dateLabel: "hace 10 d",
       difficulty: "Básico" as const,
       points: 100,
     },
     {
       title: "Eliminar Duplicados de un Array",
-      dateLabel: "10 d ago",
+      dateLabel: "hace 10 d",
       difficulty: "Avanzado" as const,
       points: 100,
     },
     {
       title: "Secuencia de Fibonacci",
-      dateLabel: "10 d ago",
+      dateLabel: "hace 10 d",
       difficulty: "Intermedio" as const,
       points: 100,
     },
     {
       title: "Verificador de Palíndromos",
-      dateLabel: "10 d ago",
+      dateLabel: "hace 10 d",
       difficulty: "Intermedio" as const,
       points: 100,
     },
     {
       title: "Invertir una Cadena",
-      dateLabel: "10 d ago",
+      dateLabel: "hace 10 d",
       difficulty: "Básico" as const,
       points: 100,
     },
     {
       title: "Trabajo en equipo bajo presión",
-      dateLabel: "21 d ago",
+      dateLabel: "hace 21 d",
       difficulty: "Intermedio" as const,
       points: 93,
     },
@@ -49,7 +49,7 @@ export const ActivitySection: React.FC<Props> = () => {
   return (
     <View style={styles.wrapper}>
       <Card variant="shadow" padding="lg" style={styles.card}>
-        <Text style={styles.title}>Completed Challenges</Text>
+        <Text style={styles.title}>Retos completados</Text>
 
         <View style={styles.list}>
           {items.map((it, idx) => (

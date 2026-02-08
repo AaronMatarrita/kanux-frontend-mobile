@@ -37,7 +37,7 @@ type Props = {
 };
 
 const CONTACT_OPTIONS: Option[] = [
-  { id: "Phone", label: "Telefono" },
+  { id: "Phone", label: "Teléfono" },
   { id: "WhatsApp", label: "WhatsApp" },
   { id: "LinkedIn", label: "LinkedIn" },
   { id: "GitHub", label: "GitHub" },
@@ -139,7 +139,7 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
     <>
       <BaseModal
         visible={visible}
-        title="Editar informacion de usuario"
+        title="Editar información de usuario"
         onClose={onClose}
         footer={
           <ModalFooterActions
@@ -158,7 +158,7 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
         }
       >
         <View style={styles.photoBlock}>
-          <Text style={styles.sectionTitle}>Foto de Perfil</Text>
+          <Text style={styles.sectionTitle}>Foto de perfil</Text>
           <View style={styles.avatarWrap}>
             <Image
               source={{
@@ -191,9 +191,9 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
               }))
             }
           >
-            <Text style={styles.changePhotoText}>Change photo</Text>
+            <Text style={styles.changePhotoText}>Cambiar foto</Text>
           </Pressable>
-          <Text style={styles.photoHint}>JPG, PNG o GIF. Max 5MB</Text>
+          <Text style={styles.photoHint}>JPG, PNG o GIF. Máx 5MB</Text>
 
           <TextField
             label="URL de foto"
@@ -212,7 +212,7 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
         </View>
 
         <TextField
-          label="Name *"
+          label="Nombre *"
           value={draft.firstName}
           onChangeText={(value) =>
             setDraft((prev) => ({ ...prev, firstName: value }))
@@ -223,7 +223,7 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
         />
 
         <TextField
-          label="Last name *"
+          label="Apellidos *"
           value={draft.lastName}
           onChangeText={(value) =>
             setDraft((prev) => ({ ...prev, lastName: value }))
@@ -234,7 +234,7 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
         />
 
         <TextField
-          label="Professional Title *"
+          label="Título profesional *"
           value={draft.headline}
           onChangeText={(value) =>
             setDraft((prev) => ({ ...prev, headline: value }))
@@ -245,7 +245,7 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
         />
 
         <TextField
-          label="Location"
+          label="Ubicación"
           value={draft.location}
           onChangeText={(value) =>
             setDraft((prev) => ({ ...prev, location: value }))
@@ -256,10 +256,10 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
         />
 
         <View style={styles.contactsHeader}>
-          <Text style={styles.sectionTitle}>Contacts</Text>
+          <Text style={styles.sectionTitle}>Contactos</Text>
           <Pressable onPress={onAddContact} style={styles.addBtn} hitSlop={10}>
             <Plus size={16} color={colors.white} />
-            <Text style={styles.addText}>Add Contact</Text>
+            <Text style={styles.addText}>Agregar contacto</Text>
           </Pressable>
         </View>
 
@@ -275,7 +275,7 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
               <View style={styles.contactInput}>
                 <TextField
                   label=""
-                  placeholder="add contact"
+                  placeholder="Agregar contacto"
                   value={c.value}
                   onChangeText={(value) => onUpdateContact(c.id, { value })}
                   variant="light"

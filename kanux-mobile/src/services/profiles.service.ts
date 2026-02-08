@@ -243,7 +243,6 @@ export const profilesService = {
     id: string | number,
     data: UpdateSkillRequest,
   ): Promise<Skill> => {
-    // Usamos patch o put según tu backend
     const res = await httpClient.put<Skill>(`/profiles/skills/me/${id}`, data);
     return res.data;
   },

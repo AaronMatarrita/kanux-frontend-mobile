@@ -17,10 +17,10 @@ import { LanguageRow } from "./basicInfo/LanguageRow";
 type Option = { id: string; label: string };
 
 const EXPERIENCE_LEVELS: Option[] = [
-  { id: "Beginner", label: "Beginner" },
-  { id: "Intermediate", label: "Intermediate" },
-  { id: "Advanced", label: "Advanced" },
-  { id: "Expert", label: "Expert" },
+  { id: "Beginner", label: "Principiante" },
+  { id: "Intermediate", label: "Intermedio" },
+  { id: "Advanced", label: "Avanzado" },
+  { id: "Expert", label: "Experto" },
 ];
 
 const LANGUAGE_LEVELS: Option[] = [
@@ -31,14 +31,14 @@ const LANGUAGE_LEVELS: Option[] = [
 ];
 
 const OPPORTUNITY: Option[] = [
-  { id: "OpenToWork", label: "Open to work" },
-  { id: "FreelanceOnly", label: "Freelance only" },
-  { id: "NotAvailable", label: "Not available" },
+  { id: "OpenToWork", label: "Disponible" },
+  { id: "FreelanceOnly", label: "Solo freelance" },
+  { id: "NotAvailable", label: "No disponible" },
 ];
 
 const EDUCATION: Option[] = [
-  { id: "University", label: "University" },
-  { id: "SelfTaught", label: "Self-taught" },
+  { id: "University", label: "Universitario" },
+  { id: "SelfTaught", label: "Autodidacta" },
   { id: "Bootcamp", label: "Bootcamp" },
 ];
 
@@ -75,9 +75,9 @@ export const EditBasicInfoModal: React.FC<Props> = ({
   const languageOptions = useMemo<Option[]>(
     () =>
       languageCatalog ?? [
-        { id: "English", label: "English" },
-        { id: "Spanish", label: "Spanish" },
-        { id: "French", label: "French" },
+        { id: "Inglés", label: "Inglés" },
+        { id: "Español", label: "Español" },
+        { id: "Francés", label: "Francés" },
       ],
     [languageCatalog],
   );
@@ -114,9 +114,9 @@ export const EditBasicInfoModal: React.FC<Props> = ({
         onClose={onClose}
         footer={<ModalFooterActions onCancel={onClose} onSave={onPressSave} />}
       >
-        {/* Experience */}
+        {/* Experiencia */}
         <SelectField
-          label="Experience Level *"
+          label="Nivel de experiencia *"
           valueLabel={
             EXPERIENCE_LEVELS.find((o) => o.id === experienceLabel)?.label
           }
@@ -124,9 +124,9 @@ export const EditBasicInfoModal: React.FC<Props> = ({
           onPress={() => setPicker("experience")}
         />
 
-        {/* Languages */}
+        {/* Idiomas */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Languages *</Text>
+          <Text style={styles.sectionTitle}>Idiomas *</Text>
 
           <Pressable
             onPress={form.addLanguage}
@@ -134,7 +134,7 @@ export const EditBasicInfoModal: React.FC<Props> = ({
             hitSlop={10}
           >
             <Plus size={16} color={colors.white} />
-            <Text style={styles.addText}>Add</Text>
+            <Text style={styles.addText}>Agregar</Text>
           </Pressable>
         </View>
 
@@ -156,18 +156,18 @@ export const EditBasicInfoModal: React.FC<Props> = ({
           />
         ))}
 
-        {/* Education */}
+        {/* Formacion */}
         <SelectField
-          label="Learning Background *"
+          label="Formación *"
           placeholder=""
           valueLabel={EDUCATION.find((o) => o.id === educationLabel)?.label}
           error={form.errors.education}
           onPress={() => setPicker("education")}
         />
 
-        {/* Opportunity */}
+        {/* Disponibilidad */}
         <SelectField
-          label="Open to Opportunities *"
+          label="Disponible para oportunidades *"
           valueLabel={oppLabel}
           error={form.errors.opportunityStatus}
           onPress={() => setPicker("opportunity")}
@@ -177,7 +177,7 @@ export const EditBasicInfoModal: React.FC<Props> = ({
       {/* Pickers */}
       <OptionsModal
         visible={picker === "experience"}
-        title="Experience Level"
+        title="Nivel de experiencia"
         options={EXPERIENCE_LEVELS}
         selectedId={form.draft.experienceLevel}
         onClose={() => setPicker(null)}
@@ -186,7 +186,7 @@ export const EditBasicInfoModal: React.FC<Props> = ({
 
       <OptionsModal
         visible={picker === "education"}
-        title="Learning Background"
+        title="Formación"
         options={EDUCATION}
         selectedId={form.draft.education}
         onClose={() => setPicker(null)}
@@ -195,7 +195,7 @@ export const EditBasicInfoModal: React.FC<Props> = ({
 
       <OptionsModal
         visible={picker === "opportunity"}
-        title="Open to Opportunities"
+        title="Disponible para oportunidades"
         options={OPPORTUNITY}
         selectedId={form.draft.opportunityStatus}
         onClose={() => setPicker(null)}

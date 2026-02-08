@@ -9,7 +9,7 @@ export const ProfileProgress = () => {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Text style={styles.label}>Complete your profile</Text>
+        <Text style={styles.label}>Completa tu perfil</Text>
         <Text style={styles.percent}>{progress}%</Text>
       </View>
 
