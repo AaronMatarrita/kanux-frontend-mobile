@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Card } from '@/components/ui/Card';
-import { ProgressBar } from '@/components/ui/ProgressBar';
-import { typography, colors, spacing } from '@/theme';
-import { ProcessedSkill } from '../hooks/useSkills';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Card } from "@/components/ui/Card";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { typography, colors, spacing } from "@/theme";
+import { ProcessedSkill } from "../hooks/useSkills";
 
 // get data
 interface SkillCategoryCardProps {
@@ -11,16 +11,14 @@ interface SkillCategoryCardProps {
   skills: ProcessedSkill[];
 }
 
-export const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({ 
-  categoryName, 
-  skills 
+export const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
+  categoryName,
+  skills,
 }) => {
   return (
     <Card variant="shadow" padding="lg" style={styles.container}>
       {/* category title*/}
-      <Text style={[typography.h3, styles.categoryTitle]}>
-        {categoryName}
-      </Text>
+      <Text style={[typography.h3, styles.categoryTitle]}>{categoryName}</Text>
 
       {/* skill list */}
       <View style={styles.skillsList}>
@@ -32,11 +30,11 @@ export const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
                 {skill.progress}%
               </Text>
             </View>
-            
-            <ProgressBar 
-              progress={skill.progress} 
-              height={6} 
-              color={colors.emerald600} 
+
+            <ProgressBar
+              progress={skill.progress}
+              height={6}
+              color={colors.emerald600}
             />
           </View>
         ))}
@@ -52,7 +50,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     color: colors.primary,
     marginBottom: spacing.md,
-    textTransform: 'capitalize',
+    textTransform: "capitalize",
   },
   skillsList: {
     gap: spacing.md,
@@ -61,8 +59,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   skillHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 4,
   },
 });

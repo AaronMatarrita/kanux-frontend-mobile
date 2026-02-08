@@ -1,20 +1,34 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { colors, typography, commonStyles } from "@theme";
+import { ScrollView } from "react-native";
+import { useState } from "react";
+import { commonStyles } from "@theme";
+import Header from "@/components/ui/Header";
 
-const ProfileScreen: React.FC = () => {
+import ProfileHeader from "@/screens/profile/components/ProfileHeader";
+import { ProfileProgress } from "./components/ProfileProgress";
+import { ProfileTabs } from "./components/ProfileTabs";
+import { AboutSection } from "./components/sections/AboutSection";
+import { BasicInfoSection } from "./components/sections/BasicInfoSection";
+import { ProfileData } from "./types";
+
+const ProfileScreen = () => {
+  const [tab, setTab] = useState<"resume" | "skills" | "activity">("resume");
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+
   return (
-    <View style={[commonStyles.container, commonStyles.centerContainer]}>
-      <Text style={styles.title}>Profile</Text>
-    </View>
+    <ScrollView>
+      <Header title={"Mi Perfil"} />
+      <ProfileHeader profile={profile!} onEditPress={() => {}} />
+      <ProfileProgress />
+      <ProfileTabs active={tab} onChange={setTab} />
+
+      {tab === "resume" && (
+        <>
+          <AboutSection />
+          <BasicInfoSection />
+        </>
+      )}
+    </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  title: {
-    ...typography.h1,
-    color: colors.text.primary,
-  },
-});
 
 export default ProfileScreen;
