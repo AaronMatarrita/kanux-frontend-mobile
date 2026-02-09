@@ -7,6 +7,7 @@ export type TabNavigatorParamList = {
   Messages: undefined;
   Profile: undefined;
   Skills:undefined;
+  Billing:undefined;
 };
 
 export type RootNavigatorParamList = {

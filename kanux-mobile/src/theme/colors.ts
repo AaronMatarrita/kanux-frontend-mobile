@@ -8,6 +8,7 @@ export const colors = {
   emerald600: "#16a34a",
   success: "#10b981",
   message: "#00c950",
+  planButton:"#009966",
 
   // Neutral
   white: "#ffffff",
