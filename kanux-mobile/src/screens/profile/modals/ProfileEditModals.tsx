@@ -17,7 +17,12 @@ type BasicInfoPayload = {
   experienceLevel: string;
   education: string;
   opportunityStatus: OpportunityStatus;
-  languages: { name: string; level: LanguageLevel }[];
+  languages: {
+    id: string;
+    name: string;
+    level: LanguageLevel;
+    languageId?: string;
+  }[];
 };
 
 type Props = {
@@ -27,14 +32,24 @@ type Props = {
 
   onSaveHeader: (payload: {
     avatarUrl?: string;
-    fullName: string;
+    avatarFile?: {
+      uri: string;
+      name: string;
+      type: string;
+    } | null;
+    firstName: string;
+    lastName: string;
     headline: string;
     location: string;
     contacts: ProfileContact[];
-  }) => void;
-  onSaveAbout: (about: string) => void;
-  onSaveBasicInfo: (payload: BasicInfoPayload) => void;
-  onSaveSkills: (skills: Skill[]) => void;
+  }) => Promise<boolean>;
+  isSavingHeader?: boolean;
+  onSaveAbout: (about: string) => Promise<boolean>;
+  isSavingAbout?: boolean;
+  onSaveBasicInfo: (payload: BasicInfoPayload) => Promise<boolean>;
+  isSavingBasicInfo?: boolean;
+  onSaveSkills: (skills: Skill[]) => Promise<boolean>;
+  isSavingSkills?: boolean;
   languageCatalog?: { id: string; label: string }[];
 };
 
@@ -43,9 +58,13 @@ export const ProfileEditModals: React.FC<Props> = ({
   profile,
   onClose,
   onSaveHeader,
+  isSavingHeader = false,
   onSaveAbout,
+  isSavingAbout = false,
   onSaveBasicInfo,
+  isSavingBasicInfo = false,
   onSaveSkills,
+  isSavingSkills = false,
   languageCatalog,
 }) => {
   return (
@@ -55,10 +74,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         visible={modalKey === "edit_header"}
         profile={profile}
         onClose={onClose}
-        onSave={(payload) => {
-          onSaveHeader(payload);
-          onClose();
-        }}
+        onSave={(payload) => onSaveHeader(payload)}
+        isSaving={isSavingHeader}
       />
 
       {/* ABOUT */}
@@ -66,10 +83,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         visible={modalKey === "edit_about"}
         initialAbout={profile.about ?? ""}
         onClose={onClose}
-        onSave={(next) => {
-          onSaveAbout(next);
-          onClose();
-        }}
+        onSave={(next) => onSaveAbout(next)}
+        isSaving={isSavingAbout}
       />
 
       {/* BASIC INFO */}
@@ -78,10 +93,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         profile={profile}
         languageCatalog={languageCatalog}
         onClose={onClose}
-        onSave={(payload) => {
-          onSaveBasicInfo(payload);
-          onClose();
-        }}
+        onSave={(payload) => onSaveBasicInfo(payload)}
+        isSaving={isSavingBasicInfo}
       />
 
       {/* SKILLS INFO */}
@@ -89,10 +102,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         visible={modalKey === "edit_skills"}
         profile={profile}
         onClose={onClose}
-        onSave={(skills) => {
-          onSaveSkills(skills);
-          onClose();
-        }}
+        onSave={(skills) => onSaveSkills(skills)}
+        isSaving={isSavingSkills}
       />
     </>
   );

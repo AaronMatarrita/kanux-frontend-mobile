@@ -15,11 +15,29 @@ import { SkillsSection } from "@/screens/profile/components/sections/SkillsSecti
 import { ActivitySection } from "@/screens/profile/components/sections/ActivitySection";
 
 import { useTalentProfile } from "./hooks/useTalentProfile";
+import { useProfileEdits } from "./hooks/useProfileEdits";
 
 export default function ProfileScreen() {
   const [tab, setTab] = useState<"resume" | "skills" | "activity">("resume");
-  const { profile, setProfile, languageCatalog, loading, error, reload } =
-    useTalentProfile();
+  const {
+    profile,
+    setProfile,
+    catalogs,
+    languageCatalog,
+    loading,
+    error,
+    reload,
+  } = useTalentProfile();
+  const {
+    isSavingAbout,
+    saveAbout,
+    isSavingBasicInfo,
+    saveBasicInfo,
+    isSavingHeader,
+    saveHeader,
+    isSavingSkills,
+    saveSkills,
+  } = useProfileEdits(profile, catalogs, setProfile);
 
   const modal = useModalState();
 
@@ -94,50 +112,14 @@ export default function ProfileScreen() {
         modalKey={modal.modal.key}
         profile={profile}
         onClose={modal.close}
-        onSaveHeader={(payload) =>
-          setProfile((p) =>
-            p
-              ? {
-                  ...p,
-                  avatarUrl: payload.avatarUrl,
-                  basicInfo: {
-                    ...p.basicInfo,
-                    fullName: payload.fullName,
-                    headline: payload.headline,
-                    location: payload.location,
-                    website:
-                      payload.contacts.find((c) => c.type === "Website")
-                        ?.value ?? p.basicInfo.website,
-                  },
-                  contacts: payload.contacts,
-                }
-              : p,
-          )
-        }
-        onSaveAbout={(about: string) =>
-          setProfile((p) => (p ? { ...p, about } : p))
-        }
-        onSaveBasicInfo={(payload) =>
-          setProfile((p) =>
-            p
-              ? {
-                  ...p,
-                  basicInfo: {
-                    ...p.basicInfo,
-                    experienceLevel: payload.experienceLevel,
-                    education: payload.education,
-                  },
-                  opportunityStatus: payload.opportunityStatus,
-                  languages: payload.languages.map((l, idx) => ({
-                    id: `local-${idx}`,
-                    name: l.name,
-                    level: l.level,
-                  })),
-                }
-              : p,
-          )
-        }
-        onSaveSkills={(skills) => setProfile((p) => (p ? { ...p, skills } : p))}
+        onSaveHeader={(payload) => saveHeader(payload)}
+        isSavingHeader={isSavingHeader}
+        onSaveAbout={(about: string) => saveAbout(about)}
+        isSavingAbout={isSavingAbout}
+        onSaveBasicInfo={(payload) => saveBasicInfo(payload)}
+        isSavingBasicInfo={isSavingBasicInfo}
+        onSaveSkills={(skills) => saveSkills(skills)}
+        isSavingSkills={isSavingSkills}
         languageCatalog={languageCatalog}
       />
     </>

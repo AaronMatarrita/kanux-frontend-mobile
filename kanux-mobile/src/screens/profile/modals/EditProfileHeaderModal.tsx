@@ -1,6 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  StyleSheet,
+  Alert,
+  Platform,
+} from "react-native";
 import { Plus, Trash2, X } from "lucide-react-native";
+import * as ImagePicker from "expo-image-picker";
 import { BaseModal } from "@/components/ui/modals/BaseModal";
 import { ModalFooterActions } from "@/components/ui/modals/ModalFooterActions";
 import { OptionsModal } from "@/components/ui/modals/OptionsModal";
@@ -16,6 +25,11 @@ type DraftContact = ProfileContact;
 
 type Draft = {
   avatarUrl?: string;
+  avatarFile?: {
+    uri: string;
+    name: string;
+    type: string;
+  } | null;
   firstName: string;
   lastName: string;
   headline: string;
@@ -29,11 +43,18 @@ type Props = {
   onClose: () => void;
   onSave: (next: {
     avatarUrl?: string;
-    fullName: string;
+    avatarFile?: {
+      uri: string;
+      name: string;
+      type: string;
+    } | null;
+    firstName: string;
+    lastName: string;
     headline: string;
     location: string;
     contacts: ProfileContact[];
-  }) => void;
+  }) => Promise<boolean>;
+  isSaving?: boolean;
 };
 
 const CONTACT_OPTIONS: Option[] = [
@@ -81,12 +102,14 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
   profile,
   onClose,
   onSave,
+  isSaving = false,
 }) => {
   const nameParts = splitName(profile.basicInfo.fullName);
 
   const initial = useMemo<Draft>(
     () => ({
       avatarUrl: profile.avatarUrl,
+      avatarFile: null,
       firstName: nameParts.firstName,
       lastName: nameParts.lastName,
       headline: profile.basicInfo.headline ?? "",
@@ -130,10 +153,59 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
     (c) => c.value.trim().length > 0,
   );
 
+  const pickImage = async () => {
+    try {
+      if (Platform.OS !== "web") {
+        const permission =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          Alert.alert(
+            "Permiso requerido",
+            "Necesitamos acceso a tus fotos para seleccionar una imagen.",
+          );
+          return;
+        }
+      }
+
+      const mediaTypes = ImagePicker.MediaTypeOptions.Images;
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes,
+        quality: 0.9,
+        allowsEditing: true,
+        aspect: [1, 1],
+      });
+
+      if (result.canceled || !result.assets?.[0]) return;
+
+      const asset = result.assets[0];
+      const fileName = asset.fileName ?? `avatar-${Date.now()}.jpg`;
+      const fileType = asset.mimeType ?? "image/jpeg";
+
+      setDraft((prev) => ({
+        ...prev,
+        avatarUrl: asset.uri,
+        avatarFile: { uri: asset.uri, name: fileName, type: fileType },
+      }));
+    } catch (error) {
+      console.error("Image picker error:", error);
+      const message =
+        error instanceof Error ? error.message : "No se pudo abrir la galeria.";
+      Alert.alert("Error", message);
+    }
+  };
+
+  const hasEmptyContacts = draft.contacts.some(
+    (c) => c.value.trim().length === 0,
+  );
+  const contactError = hasEmptyContacts
+    ? "Completa los contactos o elimina los que no uses."
+    : "";
   const canSave =
     draft.firstName.trim().length > 0 &&
     draft.lastName.trim().length > 0 &&
-    draft.headline.trim().length > 0;
+    draft.headline.trim().length > 0 &&
+    !hasEmptyContacts;
 
   return (
     <>
@@ -144,16 +216,20 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
         footer={
           <ModalFooterActions
             onCancel={onClose}
-            onSave={() =>
-              onSave({
+            onSave={async () => {
+              const saved = await onSave({
                 avatarUrl: draft.avatarUrl,
-                fullName: `${draft.firstName} ${draft.lastName}`.trim(),
+                avatarFile: draft.avatarFile ?? null,
+                firstName: draft.firstName.trim(),
+                lastName: draft.lastName.trim(),
                 headline: draft.headline.trim(),
                 location: draft.location.trim(),
                 contacts: cleanedContacts,
-              })
-            }
-            disabled={!canSave}
+              });
+              if (saved) onClose();
+            }}
+            saveLabel={isSaving ? "Guardando..." : "Guardar"}
+            disabled={!canSave || isSaving}
           />
         }
       >
@@ -170,7 +246,11 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
             {!!draft.avatarUrl && (
               <Pressable
                 onPress={() =>
-                  setDraft((prev) => ({ ...prev, avatarUrl: undefined }))
+                  setDraft((prev) => ({
+                    ...prev,
+                    avatarUrl: undefined,
+                    avatarFile: null,
+                  }))
                 }
                 style={[styles.avatarRemove, commonStyles.shadow]}
                 hitSlop={10}
@@ -183,32 +263,11 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
           <Pressable
             style={styles.changePhotoBtn}
             hitSlop={10}
-            onPress={() =>
-              setDraft((prev) => ({
-                ...prev,
-                avatarUrl:
-                  prev.avatarUrl ?? "https://i.pravatar.cc/150?u=kanux",
-              }))
-            }
+            onPress={pickImage}
           >
             <Text style={styles.changePhotoText}>Cambiar foto</Text>
           </Pressable>
           <Text style={styles.photoHint}>JPG, PNG o GIF. Máx 5MB</Text>
-
-          <TextField
-            label="URL de foto"
-            value={draft.avatarUrl ?? ""}
-            onChangeText={(value) =>
-              setDraft((prev) => ({
-                ...prev,
-                avatarUrl: value.trim() || undefined,
-              }))
-            }
-            placeholder="https://"
-            variant="light"
-            containerStyle={styles.inputBlock}
-            inputWrapStyle={styles.inputWrap}
-          />
         </View>
 
         <TextField
@@ -299,6 +358,9 @@ export const EditProfileHeaderModal: React.FC<Props> = ({
             </View>
           </View>
         ))}
+        {!!contactError && (
+          <Text style={styles.contactError}>{contactError}</Text>
+        )}
       </BaseModal>
 
       <OptionsModal
@@ -420,5 +482,10 @@ const styles = StyleSheet.create({
   labelSpacer: {
     height: LABEL_HEIGHT,
     marginBottom: 4,
+  },
+  contactError: {
+    ...typography.caption,
+    color: colors.error,
+    marginBottom: spacing.sm,
   },
 });

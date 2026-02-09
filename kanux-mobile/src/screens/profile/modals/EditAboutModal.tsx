@@ -9,7 +9,8 @@ type Props = {
   visible: boolean;
   initialAbout: string;
   onClose: () => void;
-  onSave: (nextAbout: string) => void;
+  onSave: (nextAbout: string) => Promise<boolean>;
+  isSaving?: boolean;
 };
 
 export const EditAboutModal: React.FC<Props> = ({
@@ -17,6 +18,7 @@ export const EditAboutModal: React.FC<Props> = ({
   initialAbout,
   onClose,
   onSave,
+  isSaving = false,
 }) => {
   const form = useEditAboutForm(initialAbout);
 
@@ -32,8 +34,12 @@ export const EditAboutModal: React.FC<Props> = ({
       footer={
         <ModalFooterActions
           onCancel={onClose}
-          onSave={() => onSave(form.value)}
-          disabled={!form.isValid}
+          onSave={async () => {
+            const saved = await onSave(form.value);
+            if (saved) onClose();
+          }}
+          saveLabel={isSaving ? "Guardando..." : "Guardar"}
+          disabled={!form.isValid || isSaving}
         />
       }
     >

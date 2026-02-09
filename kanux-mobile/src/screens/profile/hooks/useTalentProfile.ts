@@ -80,10 +80,24 @@ const mapSkillCategory = (skill: ApiSkill): Skill["category"] => {
   return "Other";
 };
 
-const mapContacts = (contact?: Record<string, unknown> | null) => {
-  if (!contact) return [] as ProfileContact[];
+const parseContact = (contact?: Record<string, unknown> | string | null) => {
+  if (!contact) return null;
+  if (typeof contact === "string") {
+    try {
+      const parsed = JSON.parse(contact) as Record<string, unknown> | null;
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch (error) {
+      return null;
+    }
+  }
+  return contact;
+};
 
-  return Object.entries(contact)
+const mapContacts = (contact?: Record<string, unknown> | string | null) => {
+  const normalizedContact = parseContact(contact);
+  if (!normalizedContact) return [] as ProfileContact[];
+
+  return Object.entries(normalizedContact)
     .map(([key, value]) => {
       const normalized = normalizeText(key);
       const type: ProfileContact["type"] = normalized.includes("whatsapp")
@@ -118,11 +132,21 @@ const mapLanguages = (languages?: ApiLanguage[]): Language[] =>
 
       return {
         id: item.id,
+        languageId: item.id_languages ?? item.languages?.id,
         name,
         level: mapLanguageLevel(item.level),
-      } satisfies Language;
+      };
     })
-    .filter((item): item is Language => !!item);
+    .filter(
+      (
+        item,
+      ): item is {
+        id: string;
+        languageId: string | undefined;
+        name: string;
+        level: LanguageLevel;
+      } => item !== null,
+    );
 
 const mapSkills = (skills?: ApiSkill[]): Skill[] =>
   (skills ?? []).map((skill) => ({
@@ -130,6 +154,7 @@ const mapSkills = (skills?: ApiSkill[]): Skill[] =>
     name: skill.name,
     level: mapSkillLevel(skill.level),
     category: mapSkillCategory(skill),
+    categoryId: skill.id_category ?? skill.category?.id,
     verified: true,
   }));
 
@@ -139,10 +164,10 @@ const mapProfileData = (profile: TalentProfile): ProfileData => {
     .join(" ")
     .trim();
   const contacts = mapContacts(profile.contact);
-  const rawWebsite =
-    profile.contact && typeof profile.contact === "object"
-      ? (profile.contact as Record<string, unknown>)["website"]
-      : undefined;
+  const normalizedContact = parseContact(profile.contact);
+  const rawWebsite = normalizedContact
+    ? (normalizedContact as Record<string, unknown>)["website"]
+    : undefined;
   const website =
     contacts.find((c) => c.type === "Website")?.value ??
     (rawWebsite ? String(rawWebsite) : undefined);
@@ -152,6 +177,8 @@ const mapProfileData = (profile: TalentProfile): ProfileData => {
 
   return {
     id: profile.id,
+    firstName: profile.first_name ?? undefined,
+    lastName: profile.last_name ?? undefined,
     avatarUrl: profile.image_url,
     completion: { percentage: profile.profile_completeness ?? 0 },
     about: profile.about ?? "",
@@ -215,7 +242,7 @@ export function useTalentProfile() {
   const languageCatalog = useMemo(
     () =>
       catalogs?.languages.map((lang) => ({
-        id: lang.name,
+        id: lang.id,
         label: lang.name,
       })) ?? undefined,
     [catalogs],

@@ -17,11 +17,29 @@ function uid() {
   return `tmp-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
 
+const normalizeText = (value?: string) =>
+  (value ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+const mapEducationKey = (value?: string) => {
+  const normalized = normalizeText(value);
+  if (!normalized) return "";
+  if (normalized.includes("univers")) return "University";
+  if (normalized.includes("autodidact") || normalized.includes("self")) {
+    return "SelfTaught";
+  }
+  if (normalized.includes("bootcamp")) return "Bootcamp";
+  return value ?? "";
+};
+
 export function useEditBasicInfoForm(profile: ProfileData) {
   const initial: BasicInfoDraft = useMemo(
     () => ({
       experienceLevel: profile?.basicInfo?.experienceLevel ?? "",
-      education: profile?.basicInfo?.education ?? "",
+      education: mapEducationKey(profile?.basicInfo?.education),
       opportunityStatus: profile?.opportunityStatus ?? "NotAvailable",
       languages: profile?.languages ?? [],
     }),
@@ -49,7 +67,12 @@ export function useEditBasicInfoForm(profile: ProfileData) {
       ...d,
       languages: [
         ...d.languages,
-        { id: uid(), name: "", level: "Basic" as LanguageLevel },
+        {
+          id: uid(),
+          name: "",
+          level: "Basic" as LanguageLevel,
+          languageId: "",
+        },
       ],
     }));
   };
@@ -78,7 +101,9 @@ export function useEditBasicInfoForm(profile: ProfileData) {
     if (draft.languages.length === 0) {
       next.languages = "Agrega al menos un idioma";
     } else {
-      const invalid = draft.languages.some((l) => !l.name || !l.level);
+      const invalid = draft.languages.some(
+        (l) => !l.languageId || !l.name || !l.level,
+      );
       if (invalid) next.languages = "Completa idioma y nivel";
     }
 

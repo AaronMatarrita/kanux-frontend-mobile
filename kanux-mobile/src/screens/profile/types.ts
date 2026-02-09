@@ -12,6 +12,7 @@ export interface Skill {
   name: string;
   level?: "Beginner" | "Intermediate" | "Advanced" | "Expert";
   category: "Technical" | "Soft" | "Other";
+  categoryId?: string;
   verified?: boolean;
 }
 
@@ -33,6 +34,7 @@ export interface Language {
   id: string;
   name: string;
   level: LanguageLevel;
+  languageId?: string;
 }
 
 export interface ActivityItem {
@@ -60,6 +62,8 @@ export interface ProfileBasicInfo {
 
 export interface ProfileData {
   id: string;
+  firstName?: string;
+  lastName?: string;
   avatarUrl?: string;
   completion: ProfileCompletion;
   about?: string;

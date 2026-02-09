@@ -22,7 +22,13 @@ export interface UpdateTalentProfileRequest {
   contact?: Record<string, unknown>;
   learning_background_id?: string;
   opportunity_status_id?: string;
-  image_profile?: File;
+  image_profile?:
+    | File
+    | {
+        uri: string;
+        name: string;
+        type: string;
+      };
 }
 
 export interface CreateSkillRequest {
@@ -190,8 +196,12 @@ export const profilesService = {
   ): Promise<TalentProfile> => {
     const formData = new FormData();
 
-    if (data.first_name) formData.append("first_name", data.first_name);
-    if (data.last_name) formData.append("last_name", data.last_name);
+    if (data.first_name !== undefined) {
+      formData.append("first_name", data.first_name);
+    }
+    if (data.last_name !== undefined) {
+      formData.append("last_name", data.last_name);
+    }
     if (data.title) formData.append("title", data.title);
     if (data.location) formData.append("location", data.location);
     if (data.experience_level)
@@ -207,8 +217,16 @@ export const profilesService = {
     if (data.contact) {
       formData.append("contact", JSON.stringify(data.contact));
     }
-    if (data.image_profile) {
-      formData.append("image_profile", data.image_profile);
+    if (
+      data.image_profile &&
+      typeof data.image_profile === "object" &&
+      "uri" in data.image_profile
+    ) {
+      formData.append("image_profile", {
+        uri: data.image_profile.uri,
+        name: data.image_profile.name ?? "profile.jpg",
+        type: data.image_profile.type ?? "image/jpeg",
+      } as any);
     }
 
     const res = await httpClient.put<TalentProfile>("/profiles/me", formData, {
@@ -216,6 +234,17 @@ export const profilesService = {
         "Content-Type": "multipart/form-data",
       },
     });
+    return res.data;
+  },
+
+  /**
+   * PUT /profiles/me
+   * Update current user's profile using JSON (no file upload)
+   */
+  updateMyProfileJson: async (
+    data: UpdateTalentProfileRequest,
+  ): Promise<TalentProfile> => {
+    const res = await httpClient.put<TalentProfile>("/profiles/me", data);
     return res.data;
   },
 
@@ -285,7 +314,7 @@ export const profilesService = {
     id: string,
     data: UpdateLenguageRequest,
   ): Promise<Language> => {
-    const res = await httpClient.post<Language>(
+    const res = await httpClient.put<Language>(
       `/profiles/languages/me/${id}`,
       data,
     );

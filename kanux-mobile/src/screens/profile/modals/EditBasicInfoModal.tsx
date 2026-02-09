@@ -52,8 +52,15 @@ type Props = {
     experienceLevel: string;
     education: string;
     opportunityStatus: OpportunityStatus;
-    languages: { name: string; level: LanguageLevel }[];
-  }) => void;
+    languages: {
+      id: string;
+      name: string;
+      level: LanguageLevel;
+      languageId?: string;
+    }[];
+  }) => Promise<boolean>;
+
+  isSaving?: boolean;
 
   languageCatalog?: Option[];
 };
@@ -63,6 +70,7 @@ export const EditBasicInfoModal: React.FC<Props> = ({
   profile,
   onClose,
   onSave,
+  isSaving = false,
   languageCatalog,
 }) => {
   const form = useEditBasicInfoForm(profile);
@@ -86,18 +94,22 @@ export const EditBasicInfoModal: React.FC<Props> = ({
     if (visible) form.reset();
   }, [visible]);
 
-  const onPressSave = () => {
+  const onPressSave = async () => {
     if (!form.validate()) return;
 
-    onSave({
+    const saved = await onSave({
       experienceLevel: form.draft.experienceLevel,
       education: form.draft.education,
       opportunityStatus: form.draft.opportunityStatus,
       languages: form.draft.languages.map((l) => ({
+        id: l.id,
         name: l.name,
         level: l.level,
+        languageId: l.languageId,
       })),
     });
+
+    if (saved) onClose();
   };
 
   const experienceLabel = form.draft.experienceLevel || undefined;
@@ -112,7 +124,14 @@ export const EditBasicInfoModal: React.FC<Props> = ({
         visible={visible}
         title="Editar información básica"
         onClose={onClose}
-        footer={<ModalFooterActions onCancel={onClose} onSave={onPressSave} />}
+        footer={
+          <ModalFooterActions
+            onCancel={onClose}
+            onSave={onPressSave}
+            saveLabel={isSaving ? "Guardando..." : "Guardar"}
+            disabled={isSaving}
+          />
+        }
       >
         {/* Experiencia */}
         <SelectField
@@ -208,12 +227,16 @@ export const EditBasicInfoModal: React.FC<Props> = ({
         title="Idioma"
         options={languageOptions}
         selectedId={
-          form.draft.languages.find((x) => x.id === langPickerFor)?.name
+          form.draft.languages.find((x) => x.id === langPickerFor)?.languageId
         }
         onClose={() => setLangPickerFor(null)}
         onSelect={(id) => {
           if (!langPickerFor) return;
-          form.updateLanguage(langPickerFor, { name: id });
+          const selected = languageOptions.find((o) => o.id === id);
+          form.updateLanguage(langPickerFor, {
+            name: selected?.label ?? "",
+            languageId: id,
+          });
         }}
       />
 
