@@ -33,6 +33,8 @@ export default function ProfileScreen() {
     saveAbout,
     isSavingBasicInfo,
     saveBasicInfo,
+    isSavingHeader,
+    saveHeader,
     isSavingSkills,
     saveSkills,
   } = useProfileEdits(profile, catalogs, setProfile);
@@ -110,26 +112,8 @@ export default function ProfileScreen() {
         modalKey={modal.modal.key}
         profile={profile}
         onClose={modal.close}
-        onSaveHeader={(payload) =>
-          setProfile((p) =>
-            p
-              ? {
-                  ...p,
-                  avatarUrl: payload.avatarUrl,
-                  basicInfo: {
-                    ...p.basicInfo,
-                    fullName: payload.fullName,
-                    headline: payload.headline,
-                    location: payload.location,
-                    website:
-                      payload.contacts.find((c) => c.type === "Website")
-                        ?.value ?? p.basicInfo.website,
-                  },
-                  contacts: payload.contacts,
-                }
-              : p,
-          )
-        }
+        onSaveHeader={(payload) => saveHeader(payload)}
+        isSavingHeader={isSavingHeader}
         onSaveAbout={(about: string) => saveAbout(about)}
         isSavingAbout={isSavingAbout}
         onSaveBasicInfo={(payload) => saveBasicInfo(payload)}

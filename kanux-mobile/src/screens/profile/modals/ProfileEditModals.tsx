@@ -32,11 +32,18 @@ type Props = {
 
   onSaveHeader: (payload: {
     avatarUrl?: string;
-    fullName: string;
+    avatarFile?: {
+      uri: string;
+      name: string;
+      type: string;
+    } | null;
+    firstName: string;
+    lastName: string;
     headline: string;
     location: string;
     contacts: ProfileContact[];
-  }) => void;
+  }) => Promise<boolean>;
+  isSavingHeader?: boolean;
   onSaveAbout: (about: string) => Promise<boolean>;
   isSavingAbout?: boolean;
   onSaveBasicInfo: (payload: BasicInfoPayload) => Promise<boolean>;
@@ -51,6 +58,7 @@ export const ProfileEditModals: React.FC<Props> = ({
   profile,
   onClose,
   onSaveHeader,
+  isSavingHeader = false,
   onSaveAbout,
   isSavingAbout = false,
   onSaveBasicInfo,
@@ -66,10 +74,8 @@ export const ProfileEditModals: React.FC<Props> = ({
         visible={modalKey === "edit_header"}
         profile={profile}
         onClose={onClose}
-        onSave={(payload) => {
-          onSaveHeader(payload);
-          onClose();
-        }}
+        onSave={(payload) => onSaveHeader(payload)}
+        isSaving={isSavingHeader}
       />
 
       {/* ABOUT */}

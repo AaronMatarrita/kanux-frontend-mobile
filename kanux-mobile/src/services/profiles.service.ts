@@ -22,7 +22,13 @@ export interface UpdateTalentProfileRequest {
   contact?: Record<string, unknown>;
   learning_background_id?: string;
   opportunity_status_id?: string;
-  image_profile?: File;
+  image_profile?:
+    | File
+    | {
+        uri: string;
+        name: string;
+        type: string;
+      };
 }
 
 export interface CreateSkillRequest {
@@ -211,8 +217,16 @@ export const profilesService = {
     if (data.contact) {
       formData.append("contact", JSON.stringify(data.contact));
     }
-    if (data.image_profile) {
-      formData.append("image_profile", data.image_profile);
+    if (
+      data.image_profile &&
+      typeof data.image_profile === "object" &&
+      "uri" in data.image_profile
+    ) {
+      formData.append("image_profile", {
+        uri: data.image_profile.uri,
+        name: data.image_profile.name ?? "profile.jpg",
+        type: data.image_profile.type ?? "image/jpeg",
+      } as any);
     }
 
     const res = await httpClient.put<TalentProfile>("/profiles/me", formData, {
@@ -220,6 +234,17 @@ export const profilesService = {
         "Content-Type": "multipart/form-data",
       },
     });
+    return res.data;
+  },
+
+  /**
+   * PUT /profiles/me
+   * Update current user's profile using JSON (no file upload)
+   */
+  updateMyProfileJson: async (
+    data: UpdateTalentProfileRequest,
+  ): Promise<TalentProfile> => {
+    const res = await httpClient.put<TalentProfile>("/profiles/me", data);
     return res.data;
   },
 

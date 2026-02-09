@@ -16,6 +16,7 @@ import type {
   OpportunityStatus,
   ProfileData,
   Skill as ProfileSkill,
+  ProfileContact,
 } from "../types";
 
 type SetProfile = Dispatch<SetStateAction<ProfileData | null>>;
@@ -25,6 +26,8 @@ type UseProfileEditsReturn = {
   saveAbout: (about: string) => Promise<boolean>;
   isSavingBasicInfo: boolean;
   saveBasicInfo: (payload: BasicInfoPayload) => Promise<boolean>;
+  isSavingHeader: boolean;
+  saveHeader: (payload: HeaderPayload) => Promise<boolean>;
   isSavingSkills: boolean;
   saveSkills: (skills: ProfileSkill[]) => Promise<boolean>;
 };
@@ -39,6 +42,20 @@ type BasicInfoPayload = {
     level: LanguageLevel;
     languageId?: string;
   }[];
+};
+
+type HeaderPayload = {
+  avatarUrl?: string;
+  avatarFile?: {
+    uri: string;
+    name: string;
+    type: string;
+  } | null;
+  firstName: string;
+  lastName: string;
+  headline: string;
+  location: string;
+  contacts: ProfileContact[];
 };
 
 const splitFullName = (fullName?: string) => {
@@ -209,6 +226,15 @@ const mapApiSkill = (
   };
 };
 
+const contactsToRecord = (contacts: ProfileContact[]) => {
+  return contacts.reduce<Record<string, string>>((acc, contact) => {
+    const value = contact.value.trim();
+    if (!value) return acc;
+    acc[normalizeText(contact.type)] = value;
+    return acc;
+  }, {});
+};
+
 export function useProfileEdits(
   profile: ProfileData | null,
   catalogs: Catalogs | null,
@@ -216,6 +242,7 @@ export function useProfileEdits(
 ): UseProfileEditsReturn {
   const [isSavingAbout, setIsSavingAbout] = useState(false);
   const [isSavingBasicInfo, setIsSavingBasicInfo] = useState(false);
+  const [isSavingHeader, setIsSavingHeader] = useState(false);
   const [isSavingSkills, setIsSavingSkills] = useState(false);
 
   const saveAbout = useCallback(
@@ -404,6 +431,87 @@ export function useProfileEdits(
     [catalogs, isSavingBasicInfo, profile, setProfile],
   );
 
+  const saveHeader = useCallback(
+    async (payload: HeaderPayload) => {
+      if (isSavingHeader) return false;
+
+      setIsSavingHeader(true);
+      try {
+        const baseUpdate = {
+          first_name: payload.firstName.trim(),
+          last_name: payload.lastName.trim(),
+          title: payload.headline.trim(),
+          location: payload.location.trim(),
+          contact: contactsToRecord(payload.contacts),
+        };
+
+        let updated = null as Awaited<
+          ReturnType<typeof profilesService.updateMyProfile>
+        > | null;
+
+        let imageUrlFromUpload: string | undefined;
+
+        if (payload.avatarFile) {
+          const imageUpdated = await profilesService.updateMyProfile({
+            ...baseUpdate,
+            contact: undefined,
+            image_profile: payload.avatarFile,
+          });
+
+          imageUrlFromUpload = imageUpdated.image_url ?? undefined;
+
+          updated = await profilesService.updateMyProfileJson(baseUpdate);
+
+          if (!updated.image_url && imageUpdated.image_url) {
+            updated = { ...updated, image_url: imageUpdated.image_url };
+          }
+        } else {
+          updated = await profilesService.updateMyProfileJson(baseUpdate);
+        }
+
+        const finalAvatarUrl =
+          updated.image_url ?? imageUrlFromUpload ?? payload.avatarUrl;
+
+        setProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                firstName: updated.first_name ?? payload.firstName,
+                lastName: updated.last_name ?? payload.lastName,
+                avatarUrl: finalAvatarUrl,
+                basicInfo: {
+                  ...prev.basicInfo,
+                  fullName: `${payload.firstName} ${payload.lastName}`.trim(),
+                  headline: updated.title ?? payload.headline,
+                  location: updated.location ?? payload.location,
+                  website:
+                    payload.contacts.find((c) => c.type === "Website")?.value ??
+                    prev.basicInfo.website,
+                },
+                contacts: payload.contacts,
+                completion: {
+                  percentage:
+                    updated.profile_completeness ?? prev.completion.percentage,
+                },
+              }
+            : prev,
+        );
+
+        return true;
+      } catch (saveError) {
+        const message =
+          saveError instanceof Error
+            ? saveError.message
+            : "No se pudo actualizar la informacion del perfil.";
+        Alert.alert("Error", message);
+        return false;
+      } finally {
+        setIsSavingHeader(false);
+      }
+    },
+    [isSavingHeader, setProfile],
+  );
+
   const saveSkills = useCallback(
     async (skills: ProfileSkill[]) => {
       if (isSavingSkills || !profile) return false;
@@ -517,6 +625,8 @@ export function useProfileEdits(
     saveAbout,
     isSavingBasicInfo,
     saveBasicInfo,
+    isSavingHeader,
+    saveHeader,
     isSavingSkills,
     saveSkills,
   };
