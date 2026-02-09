@@ -25,7 +25,10 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
+      <ScrollView
+        style={scrollStyle}
+        contentContainerStyle={{ paddingBottom: spacing.xxxl }}
+      >
         <Header title={"Mi Perfil"} />
         <ProfileSkeleton />
       </ScrollView>
@@ -34,7 +37,7 @@ export default function ProfileScreen() {
 
   if (!profile || error) {
     return (
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView style={scrollStyle} contentContainerStyle={{ flexGrow: 1 }}>
         <Header title={"Mi Perfil"} />
         <EmptyState
           title="No se pudo cargar el perfil"
@@ -48,7 +51,10 @@ export default function ProfileScreen() {
 
   return (
     <>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
+      <ScrollView
+        style={scrollStyle}
+        contentContainerStyle={{ paddingBottom: spacing.xxxl }}
+      >
         <Header title={"Mi Perfil"} />
 
         <ProfileHeader
@@ -137,3 +143,7 @@ export default function ProfileScreen() {
     </>
   );
 }
+
+const scrollStyle = {
+  backgroundColor: "#fff",
+};

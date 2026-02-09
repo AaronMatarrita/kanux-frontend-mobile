@@ -42,6 +42,28 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     textAlign: "center",
   },
+  progressBlock: {
+    marginTop: spacing.md,
+  },
+  progressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.xs,
+  },
+  progressLabel: {
+    ...typography.captionSmall,
+    color: colors.textColors.secondary,
+  },
+  progressValue: {
+    ...typography.captionSmall,
+    color: colors.primary,
+    fontWeight: "700",
+  },
+  progressHint: {
+    ...typography.captionSmall,
+    color: colors.textColors.secondary,
+    marginTop: spacing.xs,
+  },
 });
 
 export default styles;

@@ -21,6 +21,15 @@ export const ProfileSkeleton: React.FC = () => {
           <SkeletonBlock style={styles.subtitle} />
           <SkeletonBlock style={styles.link} />
         </View>
+
+        <View style={styles.progressBlock}>
+          <View style={styles.progressHeader}>
+            <SkeletonBlock style={styles.progressLabel} />
+            <SkeletonBlock style={styles.progressValue} />
+          </View>
+          <SkeletonBlock style={styles.progressBar} />
+          <SkeletonBlock style={styles.progressHint} />
+        </View>
       </Card>
 
       <View style={styles.tabs}>
@@ -82,6 +91,32 @@ const styles = StyleSheet.create({
   link: {
     width: "50%",
     height: 10,
+  },
+  progressBlock: {
+    marginTop: spacing.md,
+  },
+  progressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.xs,
+  },
+  progressLabel: {
+    width: "30%",
+    height: 10,
+  },
+  progressValue: {
+    width: "18%",
+    height: 10,
+  },
+  progressBar: {
+    width: "100%",
+    height: 8,
+    borderRadius: 6,
+  },
+  progressHint: {
+    width: "80%",
+    height: 10,
+    marginTop: spacing.xs,
   },
   tabs: {
     flexDirection: "row",
