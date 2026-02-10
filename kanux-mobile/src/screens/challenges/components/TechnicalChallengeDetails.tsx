@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Platform, Alert } from 'react-native';
 import { Code2, Clock, BarChart3, Building2, Play } from 'lucide-react-native';
 import { challengesService } from '@/services/challenges.service';
 import { colors } from '@theme';
@@ -7,12 +7,20 @@ import { Card } from '@/components/ui/Card';
 import Markdown from 'react-native-markdown-display';
 
 interface TechnicalDetailsProps {
-   data:any
+    data: any
 }
 
 export const TechnicalChallengeDetails: React.FC<TechnicalDetailsProps> = ({
     data,
 }) => {
+
+    const handleStartPress = () => {
+        Alert.alert(
+            "Desafío Técnico",
+            "Este desafío está diseñado para completarse en un entorno de desarrollo profesional. Por esta razón, solo está disponible a través de nuestra plataforma web.",
+            [{ text: "Entendido", style: "default" }]
+        );
+    };
 
     return (
         <View style={styles.mainContainer}>
@@ -46,7 +54,7 @@ export const TechnicalChallengeDetails: React.FC<TechnicalDetailsProps> = ({
                             </View>
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8}>
+                    <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8} onPress={handleStartPress}>
                         <Play size={18} color="#fff" fill="#fff" />
                         <Text style={styles.buttonText}>Iniciar desafío</Text>
                     </TouchableOpacity>
@@ -62,7 +70,7 @@ export const TechnicalChallengeDetails: React.FC<TechnicalDetailsProps> = ({
                 <Text style={styles.sectionLabel}>Resumen del desafío</Text>
                 <Card variant={"shadow"} style={styles.contentCard}>
                     <InfoItem icon={<Code2 size={18} color="#64748b" />} label="Tipo" value={data.challenge_type} />
-                    <InfoItem icon={<Clock size={18} color="#64748b" />} label="Duración" value={`${data.duration_minutes} m`}/>
+                    <InfoItem icon={<Clock size={18} color="#64748b" />} label="Duración" value={`${data.duration_minutes} m`} />
                     <InfoItem icon={<BarChart3 size={18} color="#64748b" />} label="Dificultad" value={data.difficulty} isLast={true} />
                 </Card>
 

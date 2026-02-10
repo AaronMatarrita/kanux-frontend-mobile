@@ -8,6 +8,7 @@ import { useChallengesDetails } from "../hooks/useChallengesDetails";
 import { TechnicalChallengeDetails } from "../components/TechnicalChallengeDetails";
 import { SoftChallengeDetails } from "../components/SoftChallengeDetails";
 import { ChallengeDetailSkeleton } from "../components/ChallengeDetailsSkeleton";
+import { RetryState } from "@/components/ui/RetryState";
 
 
 const ChallengesDetailsScreen: React.FC = () => {
@@ -15,24 +16,23 @@ const ChallengesDetailsScreen: React.FC = () => {
     const route = useRoute<RouteProp<ChallengesStackParamList, "ChallengeDetail">>();
     const { challengeId } = route.params;
 
-    const { challengeType, loading, data, error } = useChallengesDetails({ id: challengeId });
+    const { challengeType, loading, data, error, loadChallengeData } = useChallengesDetails({ id: challengeId });
 
     return (
         <View style={[commonStyles.container, { flex: 1 }]}>
-            <Header 
+            <Header
                 title="Detalles"
                 leftIcon={<ChevronLeft color={colors.textColors.inverted} size={24} />}
                 onLeftPress={() => navigation.goBack()}
             />
-
             {loading ? (
                 <ChallengeDetailSkeleton />
             ) : error || !challengeType ? (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-                    <Text style={{ textAlign: 'center', color: colors.gray600 }}>
-                        No pudimos encontrar la información de este desafío.
-                    </Text>
-                </View>
+                <RetryState
+                    title="Error de conexión"
+                    message="No logramos obtener la información del desafío seleccionado."
+                    onRetry={() => loadChallengeData()}
+                />
             ) : (
                 <>
                     {challengeType === "technical" ? (

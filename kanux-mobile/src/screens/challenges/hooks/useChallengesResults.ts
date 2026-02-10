@@ -183,6 +183,7 @@ export const useSoftChallengeResults = (submissionId: string) => {
   }, [submissionId]);
 
   const fetchData = useCallback(async () => {
+    setError(null);
     try {
       setLoading(true);
       const cached = await AsyncStorage.getItem(`challenge:result:${submissionId}`);
@@ -210,5 +211,5 @@ export const useSoftChallengeResults = (submissionId: string) => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  return { resultData, feedback, loading, error, copied, copyToClipboard };
+  return { resultData, feedback, loading, error, copied, copyToClipboard, fetchData };
 };

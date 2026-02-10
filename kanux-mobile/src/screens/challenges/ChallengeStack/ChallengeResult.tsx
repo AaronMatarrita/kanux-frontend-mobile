@@ -8,6 +8,8 @@ import { Card } from '@components/ui/Card';
 import { colors, typography, spacing, commonStyles } from '@/theme';
 import { ChallengesStackParamList } from '@/types/navigation';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Header } from '@/components/messages';
+import { RetryState } from '@/components/ui/RetryState';
 
 const { width } = Dimensions.get('window');
 
@@ -16,197 +18,207 @@ export const SoftChallengeResultsScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ChallengesStackParamList>>();
     const route = useRoute<RouteProp<ChallengesStackParamList, "ChallengeResult">>();
     const { submissionId } = route.params;
-    const { resultData, feedback, loading, copied, copyToClipboard } = useSoftChallengeResults(submissionId);
-
-    if (loading) return <ResultsSkeleton />;
-
+    const { resultData, feedback, loading, copied, copyToClipboard, error, fetchData } = useSoftChallengeResults(submissionId);
     const finalScore = feedback.finalScore ?? Math.round(resultData?.score ?? 0);
     const isPassed = finalScore >= 60;
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <>
+            <Header
+                title="Resultados"
+                leftIcon={<ChevronLeft color={colors.textColors.inverted} size={24} />}
+                onLeftPress={() => navigation.navigate("ChallengesList")}
+            />
+            {loading ? (
+                <ResultsSkeleton />
+            ) : error ? (
+                <RetryState
+                    title="Error de conexión"
+                    message="No logramos obtener los detalles de resultado."
+                    onRetry={() => fetchData()}
+                />
+            ) : (
+                <SafeAreaView style={styles.safeArea}>
+                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
-                {/* hero section */}
-                <View style={[styles.hero, isPassed ? styles.heroSuccess : styles.heroFail]}>
-                    <TouchableOpacity onPress={() => navigation.navigate("ChallengesList")} style={styles.backButton}>
-                        <ChevronLeft color={colors.white} size={28} />
-                    </TouchableOpacity>
+                        {/* hero section */}
+                        <View style={[styles.hero, isPassed ? styles.heroSuccess : styles.heroFail]}>
+                            <View style={styles.heroContent}>
+                                <View style={styles.iconCircle}>
+                                    <Trophy color={colors.white} size={48} />
+                                </View>
+                                <Text style={styles.heroTitle}>{isPassed ? "¡FELICITACIONES!" : "BUEN INTENTO"}</Text>
+                                <Text style={styles.heroSubtitle}>{resultData?.challenge?.title || "RESULTADO DEL RETO"}</Text>
 
-                    <View style={styles.heroContent}>
-                        <View style={styles.iconCircle}>
-                            <Trophy color={colors.white} size={48} />
+                                <View style={[styles.scoreBadge, commonStyles.shadow]}>
+                                    <Text style={[styles.scoreText, isPassed ? styles.textSuccess : styles.textFail]}>{finalScore}</Text>
+                                    <Text style={styles.scorePercent}>%</Text>
+                                </View>
+                            </View>
                         </View>
-                        <Text style={styles.heroTitle}>{isPassed ? "¡FELICITACIONES!" : "BUEN INTENTO"}</Text>
-                        <Text style={styles.heroSubtitle}>{resultData?.challenge?.title || "RESULTADO DEL RETO"}</Text>
 
-                        <View style={[styles.scoreBadge, commonStyles.shadow]}>
-                            <Text style={[styles.scoreText, isPassed ? styles.textSuccess : styles.textFail]}>{finalScore}</Text>
-                            <Text style={styles.scorePercent}>%</Text>
-                        </View>
-                    </View>
-                </View>
+                        <View style={styles.mainContainer}>
 
-                <View style={styles.mainContainer}>
-
-                    {/* info row*/}
-                    <View style={styles.infoRow}>
-                        <Card variant="shadow" padding="md" style={styles.infoCard}>
-                            <AlertCircle size={18} color={colors.warning} />
-                            <View style={styles.infoTextContainer}>
-                                <Text style={styles.infoLabel}>Dificultad</Text>
-                                <View style={styles.difficultyBadge}>
-                                    <Text style={styles.difficultyText}>Básico</Text>
-                                </View>
-                            </View>
-                        </Card>
-                        <Card variant="shadow" padding="md" style={styles.infoCard}>
-                            <ListChecks size={18} color={colors.info} />
-                            <View style={styles.infoTextContainer}>
-                                <Text style={styles.infoLabel}>Enviado</Text>
-                                <Text style={styles.infoValue}>10 feb</Text>
-                            </View>
-                        </Card>
-                    </View>
-                    {/* ia note*/}
-                    <Card variant="outline" padding="md" style={styles.aiWarningCard}>
-                        <AlertCircle size={20} color={colors.warning} />
-                        <Text style={styles.aiWarningText}>
-                            Esta retroalimentación fue generada por una inteligencia artificial y puede no ser completamente precisa. Úsala como guía de apoyo, no como una evaluación definitiva.
-                        </Text>
-                    </Card>
-
-                    {/* Analisys*/}
-                    {feedback.summary && (
-                        <Card variant="shadow" style={styles.sectionMargin}>
-                            <Text style={styles.sectionLabel}>ANÁLISIS GENERAL</Text>
-                            <Text style={styles.summaryText}>{feedback.summary}</Text>
-                        </Card>
-                    )}
-
-                    {/* stadistics */}
-                    {feedback.answersOverview && (
-                        <View style={styles.statsRow}>
-                            <Card variant="shadow" padding="sm" style={StyleSheet.flatten([styles.statBox, { borderLeftColor: colors.success, borderLeftWidth: 4 }])}>
-                                <Text style={styles.statNumber}>{feedback.answersOverview.correct ?? 0}</Text>
-                                <Text style={styles.statLabel}>Correctas</Text>
-                            </Card>
-                            <Card variant="shadow" padding="sm" style={StyleSheet.flatten([styles.statBox, { borderLeftColor: colors.error, borderLeftWidth: 4 }])}>
-                                <Text style={styles.statNumber}>{feedback.answersOverview.incorrect ?? 0}</Text>
-                                <Text style={styles.statLabel}>Incorrectas</Text>
-                            </Card>
-                            <Card variant="shadow" padding="sm" style={StyleSheet.flatten([styles.statBox, { borderLeftColor: colors.info, borderLeftWidth: 4 }])}>
-                                <Text style={styles.statNumber}>{feedback.answersOverview.total ?? 0}</Text>
-                                <Text style={styles.statLabel}>Total</Text>
-                            </Card>
-                        </View>
-                    )}
-
-                    {/* tags */}
-                    {feedback.tags && feedback.tags.length > 0 && (
-                        <View style={styles.tagsContainer}>
-                            {feedback.tags.map((tag, index) => (
-                                <View key={index} style={styles.tagBadge}>
-                                    <Text style={styles.tagText}>{tag}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    )}
-
-                    {/* strenghts */}
-                    {feedback.strengths && feedback.strengths.length > 0 && (
-                        <Card variant="shadow" style={styles.sectionMargin}>
-                            <View style={styles.cardHeader}>
-                                <CheckCircle2 size={20} color={colors.emerald600} />
-                                <Text style={styles.cardTitle}>Fortalezas</Text>
-                            </View>
-                            {feedback.strengths.map((item, i) => (
-                                <View key={i} style={styles.itemRow}>
-                                    <Text style={[styles.bullet, { color: colors.success }]}>•</Text>
-                                    <Text style={styles.itemText}>{item}</Text>
-                                </View>
-                            ))}
-                        </Card>
-                    )}
-
-                    {/* improvement */}
-                    {feedback.areasForImprovement && feedback.areasForImprovement.length > 0 && (
-                        <Card variant="shadow" style={styles.sectionMargin}>
-                            <View style={styles.cardHeader}>
-                                <Target size={20} color={colors.warning} />
-                                <Text style={styles.cardTitle}>Áreas de Mejora</Text>
-                            </View>
-                            {feedback.areasForImprovement.map((item, i) => (
-                                <View key={i} style={styles.itemRow}>
-                                    <Text style={[styles.bullet, { color: colors.warning }]}>•</Text>
-                                    <Text style={styles.itemText}>{item}</Text>
-                                </View>
-                            ))}
-                        </Card>
-                    )}
-
-                    {/* next steps */}
-                    {feedback.nextSteps && feedback.nextSteps.length > 0 && (
-                        <Card variant="outline" style={StyleSheet.flatten([styles.sectionMargin, styles.nextStepsCard])}>
-                            <View style={styles.cardHeader}>
-                                <Lightbulb size={20} color={colors.info} />
-                                <Text style={[styles.cardTitle, { color: colors.info }]}>Siguientes Pasos</Text>
-                            </View>
-                            {feedback.nextSteps.map((item, i) => (
-                                <View key={i} style={styles.itemRow}>
-                                    <Text style={[styles.stepNumber, { color: colors.info }]}>{i + 1}.</Text>
-                                    <Text style={[styles.itemText, { color: colors.gray700 }]}>{item}</Text>
-                                </View>
-                            ))}
-                        </Card>
-                    )}
-
-                    {/* DESGLOSE DETALLADO (PREGUNTAS) - RESTAURADO */}
-                    {feedback.perQuestionFeedback && feedback.perQuestionFeedback.length > 0 && (
-                        <Card variant="shadow" style={styles.sectionMargin}>
-                            <View style={styles.cardHeader}>
-                                <ListChecks size={20} color={colors.primary} />
-                                <Text style={styles.cardTitle}>Desglose Detallado</Text>
-                            </View>
-                            {feedback.perQuestionFeedback.map((q, i) => (
-                                <View key={i} style={StyleSheet.flatten([styles.questionBox, i === (feedback.perQuestionFeedback?.length ?? 0) - 1 && { borderBottomWidth: 0 }])}>
-                                    <View style={styles.questionHeader}>
-                                        <Text style={styles.questionNumber}>Pregunta {i + 1}</Text>
-                                        <View style={[styles.statusBadge, { backgroundColor: q.correct ? colors.primaryLight : '#fee2e2' }]}>
-                                            <Text style={{ color: q.correct ? colors.primaryDark : colors.error, ...typography.captionSmall, fontWeight: 'bold' }}>
-                                                {q.correct ? 'CORRECTA' : 'INCORRECTA'}
-                                            </Text>
+                            {/* info row*/}
+                            <View style={styles.infoRow}>
+                                <Card variant="shadow" padding="md" style={styles.infoCard}>
+                                    <AlertCircle size={18} color={colors.warning} />
+                                    <View style={styles.infoTextContainer}>
+                                        <Text style={styles.infoLabel}>Dificultad</Text>
+                                        <View style={styles.difficultyBadge}>
+                                            <Text style={styles.difficultyText}>Básico</Text>
                                         </View>
                                     </View>
-                                    <Text style={styles.explanationText}>{q.explanation}</Text>
+                                </Card>
+                                <Card variant="shadow" padding="md" style={styles.infoCard}>
+                                    <ListChecks size={18} color={colors.info} />
+                                    <View style={styles.infoTextContainer}>
+                                        <Text style={styles.infoLabel}>Enviado</Text>
+                                        <Text style={styles.infoValue}>10 feb</Text>
+                                    </View>
+                                </Card>
+                            </View>
+                            {/* ia note*/}
+                            <Card variant="outline" padding="md" style={styles.aiWarningCard}>
+                                <AlertCircle size={20} color={colors.warning} />
+                                <Text style={styles.aiWarningText}>
+                                    Esta retroalimentación fue generada por una inteligencia artificial y puede no ser completamente precisa. Úsala como guía de apoyo, no como una evaluación definitiva.
+                                </Text>
+                            </Card>
+
+                            {/* Analisys*/}
+                            {feedback.summary && (
+                                <Card variant="shadow" style={styles.sectionMargin}>
+                                    <Text style={styles.sectionLabel}>ANÁLISIS GENERAL</Text>
+                                    <Text style={styles.summaryText}>{feedback.summary}</Text>
+                                </Card>
+                            )}
+
+                            {/* stadistics */}
+                            {feedback.answersOverview && (
+                                <View style={styles.statsRow}>
+                                    <Card variant="shadow" padding="sm" style={StyleSheet.flatten([styles.statBox, { borderLeftColor: colors.success, borderLeftWidth: 4 }])}>
+                                        <Text style={styles.statNumber}>{feedback.answersOverview.correct ?? 0}</Text>
+                                        <Text style={styles.statLabel}>Correctas</Text>
+                                    </Card>
+                                    <Card variant="shadow" padding="sm" style={StyleSheet.flatten([styles.statBox, { borderLeftColor: colors.error, borderLeftWidth: 4 }])}>
+                                        <Text style={styles.statNumber}>{feedback.answersOverview.incorrect ?? 0}</Text>
+                                        <Text style={styles.statLabel}>Incorrectas</Text>
+                                    </Card>
+                                    <Card variant="shadow" padding="sm" style={StyleSheet.flatten([styles.statBox, { borderLeftColor: colors.info, borderLeftWidth: 4 }])}>
+                                        <Text style={styles.statNumber}>{feedback.answersOverview.total ?? 0}</Text>
+                                        <Text style={styles.statLabel}>Total</Text>
+                                    </Card>
                                 </View>
-                            ))}
-                        </Card>
-                    )}
+                            )}
 
-                    {/* FOOTER */}
-                    <View style={styles.footer}>
-                        <TouchableOpacity onPress={copyToClipboard} style={styles.idButton}>
-                            <View>
-                                <Text style={styles.idLabel}>ID DE ENVÍO</Text>
-                                <Text style={styles.idValue}>{submissionId.slice(0, 24)}...</Text>
-                            </View>
-                            <View style={styles.copyIconContainer}>
-                                {copied ? <CheckCircle2 size={16} color={colors.success} /> : <Copy size={16} color={colors.muted} />}
-                            </View>
-                        </TouchableOpacity>
+                            {/* tags */}
+                            {feedback.tags && feedback.tags.length > 0 && (
+                                <View style={styles.tagsContainer}>
+                                    {feedback.tags.map((tag, index) => (
+                                        <View key={index} style={styles.tagBadge}>
+                                            <Text style={styles.tagText}>{tag}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
 
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate("ChallengesList")}
-                            style={styles.primaryButton}
-                        >
-                            <Text style={styles.primaryButtonText}>Continuar</Text>
-                            <ArrowRight color={colors.white} size={20} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                            {/* strenghts */}
+                            {feedback.strengths && feedback.strengths.length > 0 && (
+                                <Card variant="shadow" style={styles.sectionMargin}>
+                                    <View style={styles.cardHeader}>
+                                        <CheckCircle2 size={20} color={colors.emerald600} />
+                                        <Text style={styles.cardTitle}>Fortalezas</Text>
+                                    </View>
+                                    {feedback.strengths.map((item, i) => (
+                                        <View key={i} style={styles.itemRow}>
+                                            <Text style={[styles.bullet, { color: colors.success }]}>•</Text>
+                                            <Text style={styles.itemText}>{item}</Text>
+                                        </View>
+                                    ))}
+                                </Card>
+                            )}
+
+                            {/* improvement */}
+                            {feedback.areasForImprovement && feedback.areasForImprovement.length > 0 && (
+                                <Card variant="shadow" style={styles.sectionMargin}>
+                                    <View style={styles.cardHeader}>
+                                        <Target size={20} color={colors.warning} />
+                                        <Text style={styles.cardTitle}>Áreas de Mejora</Text>
+                                    </View>
+                                    {feedback.areasForImprovement.map((item, i) => (
+                                        <View key={i} style={styles.itemRow}>
+                                            <Text style={[styles.bullet, { color: colors.warning }]}>•</Text>
+                                            <Text style={styles.itemText}>{item}</Text>
+                                        </View>
+                                    ))}
+                                </Card>
+                            )}
+
+                            {/* next steps */}
+                            {feedback.nextSteps && feedback.nextSteps.length > 0 && (
+                                <Card variant="outline" style={StyleSheet.flatten([styles.sectionMargin, styles.nextStepsCard])}>
+                                    <View style={styles.cardHeader}>
+                                        <Lightbulb size={20} color={colors.info} />
+                                        <Text style={[styles.cardTitle, { color: colors.info }]}>Siguientes Pasos</Text>
+                                    </View>
+                                    {feedback.nextSteps.map((item, i) => (
+                                        <View key={i} style={styles.itemRow}>
+                                            <Text style={[styles.stepNumber, { color: colors.info }]}>{i + 1}.</Text>
+                                            <Text style={[styles.itemText, { color: colors.gray700 }]}>{item}</Text>
+                                        </View>
+                                    ))}
+                                </Card>
+                            )}
+
+                            {/* feedback */}
+                            {feedback.perQuestionFeedback && feedback.perQuestionFeedback.length > 0 && (
+                                <Card variant="shadow" style={styles.sectionMargin}>
+                                    <View style={styles.cardHeader}>
+                                        <ListChecks size={20} color={colors.primary} />
+                                        <Text style={styles.cardTitle}>Desglose Detallado</Text>
+                                    </View>
+                                    {feedback.perQuestionFeedback.map((q, i) => (
+                                        <View key={i} style={StyleSheet.flatten([styles.questionBox, i === (feedback.perQuestionFeedback?.length ?? 0) - 1 && { borderBottomWidth: 0 }])}>
+                                            <View style={styles.questionHeader}>
+                                                <Text style={styles.questionNumber}>Pregunta {i + 1}</Text>
+                                                <View style={[styles.statusBadge, { backgroundColor: q.correct ? colors.primaryLight : '#fee2e2' }]}>
+                                                    <Text style={{ color: q.correct ? colors.primaryDark : colors.error, ...typography.captionSmall, fontWeight: 'bold' }}>
+                                                        {q.correct ? 'CORRECTA' : 'INCORRECTA'}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <Text style={styles.explanationText}>{q.explanation}</Text>
+                                        </View>
+                                    ))}
+                                </Card>
+                            )}
+
+                            {/* FOOTER */}
+                            <View style={styles.footer}>
+                                <TouchableOpacity onPress={copyToClipboard} style={styles.idButton}>
+                                    <View>
+                                        <Text style={styles.idLabel}>ID DE ENVÍO</Text>
+                                        <Text style={styles.idValue}>{submissionId.slice(0, 24)}...</Text>
+                                    </View>
+                                    <View style={styles.copyIconContainer}>
+                                        {copied ? <CheckCircle2 size={16} color={colors.success} /> : <Copy size={16} color={colors.muted} />}
+                                    </View>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate("ChallengesList")}
+                                    style={styles.primaryButton}
+                                >
+                                    <Text style={styles.primaryButtonText}>Continuar</Text>
+                                    <ArrowRight color={colors.white} size={20} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </ScrollView>
+                </SafeAreaView>
+            )}
+        </>
     );
 };
 
@@ -232,7 +244,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.gray50
     },
     scrollContent: {
-        paddingTop:spacing.xxxl,
         paddingBottom: spacing.xxxl
     },
     hero: {

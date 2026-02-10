@@ -7,29 +7,29 @@ export function useChallengesDetails({ id }: { id: string }) {
     const [data, setData] = useState<any>(null);
     const [error, setError] = useState<boolean>(false);
 
-    useEffect(() => {
-        async function loadChallengeData() {
-            setLoading(true);
-            setError(false);
+    async function loadChallengeData() {
+        setLoading(true);
+        setError(false);
+        try {
+            const techRes = await challengesService.getPublicTechnicalChallengeDetail(id);
+            setData(techRes.data || techRes);
+            setChallengeType("technical");
+        } catch (err) {
             try {
-                const techRes = await challengesService.getPublicTechnicalChallengeDetail(id);
-                setData(techRes.data || techRes); 
-                setChallengeType("technical");
-            } catch (err) {
-                try {
-                    const softRes = await challengesService.getSoftChallenge(id);
-                    setData(softRes);
-                    setChallengeType("soft");
-                } catch (softErr) {
-                    console.error("Error detectando el reto:", softErr);
-                    setError(true);
-                    setChallengeType(null);
-                }
-            } finally {
-                setLoading(false);
+                const softRes = await challengesService.getSoftChallenge(id);
+                setData(softRes);
+                setChallengeType("soft");
+            } catch (softErr) {
+                console.error("Error detectando el reto:", softErr);
+                setError(true);
+                setChallengeType(null);
             }
+        } finally {
+            setLoading(false);
         }
+    }
 
+    useEffect(() => {
         if (id) loadChallengeData();
     }, [id]);
 
@@ -37,6 +37,7 @@ export function useChallengesDetails({ id }: { id: string }) {
         challengeType,
         loading,
         data,
-        error
+        error,
+        loadChallengeData,
     };
 }

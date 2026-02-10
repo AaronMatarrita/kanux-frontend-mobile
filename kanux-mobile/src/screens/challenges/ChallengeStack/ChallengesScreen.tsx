@@ -12,6 +12,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ChallengesStackParamList } from "@/types/navigation";
 import { ChallengeListSkeleton } from "../components/ChallengesSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { RetryState } from "@/components/ui/RetryState";
 
 
 const ChallengesScreen: React.FC = () => {
@@ -20,17 +21,17 @@ const ChallengesScreen: React.FC = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [history, setHistory] = useState<ChallengeSubmission[]>([]);
 
-  const { loadChallenges, loadHistory, isLoading } = useChallengesList();
+  const { loadChallenges, loadHistory, isLoading, error } = useChallengesList();
 
+  const fetchInitialData = async () => {
+    const results = await loadChallenges("all", 1, 20);
+    if (!results.error) {
+      setChallenges([...results.technical, ...results.soft]);
+    }
+    const data = await loadHistory();
+    setHistory(data);
+  };
   useEffect(() => {
-    const fetchInitialData = async () => {
-      const results = await loadChallenges("all", 1, 20);
-      if (!results.error) {
-        setChallenges([...results.technical, ...results.soft]);
-      }
-      const data = await loadHistory();
-      setHistory(data);
-    };
     fetchInitialData();
   }, []);
 
@@ -46,7 +47,25 @@ const ChallengesScreen: React.FC = () => {
     if (isLoading) {
       return <ChallengeListSkeleton isProgress={activeTab === "complete"} />;
     }
+    if (error) {
+      return (
+        <RetryState
+          title="Error de conexión"
+          message="No logramos conectar con el servidor para obtener los challenges."
+          onRetry={() => fetchInitialData()}
+        />
+      );
+    }
     if (activeTab === "challenges") {
+      if (!challenges) {
+        return (
+          <EmptyState
+            title="Aún no hay challenges disponibles."
+            description="Demuestra tu talento realizando estos desafíos."
+            iconName="Zap"
+          />
+        )
+      }
       return (
         <FlatList
           data={challenges}
@@ -67,12 +86,11 @@ const ChallengesScreen: React.FC = () => {
         return (
           <EmptyState
             title="Aún no has completado desafíos."
-            description="Demuestra tu talento realizando retos técnicos y tus habilidades aparecerán aquí automáticamente."
+            description="Demuestra tu talento realizando desafíos."
             iconName="Zap"
           />
         )
       }
-
       return (
         <FlatList
           data={history}
@@ -102,7 +120,7 @@ const ChallengesScreen: React.FC = () => {
 
   return (
     <View style={[commonStyles.container, { flex: 1 }]}>
-      <Header title={"Habilidades"} />
+      <Header title={"Desafío"} />
       <View style={styles.tabContainer}>
         <Tabs
           tabs={[
