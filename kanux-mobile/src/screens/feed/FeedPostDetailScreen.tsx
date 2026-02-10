@@ -1,5 +1,3 @@
-// src/screens/feed/FeedPostDetailScreen.tsx
-
 import React, {
   useCallback,
   useEffect,
@@ -18,7 +16,13 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { ArrowLeft, Heart, MessageCircle, Trash } from "lucide-react-native";
+import {
+  ArrowLeft,
+  Heart,
+  MessageCircle,
+  Trash,
+  Trash2,
+} from "lucide-react-native";
 import Avatar from "@/components/messages/Avatar";
 import Header from "@/components/ui/Header";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -29,6 +33,7 @@ import type { FeedStackParamList } from "@/types/navigation";
 import CommentInput from "./components/CommentInput";
 import { feedService, type Comment } from "@/services/feed.service";
 import { useAuth } from "@/context/AuthContext";
+import { ConfirmActionSheet } from "@/components/ui/ConfirmActionSheet";
 
 type Props = NativeStackScreenProps<FeedStackParamList, "FeedPostDetail">;
 
@@ -44,34 +49,60 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [sendingComment, setSendingComment] = useState(false);
+
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
     null,
   );
-  const myUserId = session?.user?.id;
-  const handleDeleteComment = useCallback(
-    async (commentId: string) => {
-      try {
-        setDeletingCommentId(commentId);
-        await feedService.deleteComment(commentId);
-        setComments((prev) => prev.filter((c) => c.id !== commentId));
-        setPost((prev) => ({
-          ...prev,
-          comments: Math.max(0, prev.comments - 1),
-        }));
-      } catch (err) {
-        Alert.alert(
-          "Error",
-          "No se pudo eliminar el comentario. Intenta de nuevo.",
-        );
-      } finally {
-        setDeletingCommentId(null);
-      }
-    },
-    [feedService],
+
+  const [deleteSheetOpen, setDeleteSheetOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<FeedComment | null>(
+    null,
   );
+
+  const myUserId = session?.user?.id;
 
   const scrollRef = useRef<ScrollView>(null);
   const navigatingBackRef = useRef(false);
+
+  const handleDeleteComment = useCallback(async (commentId: string) => {
+    try {
+      setDeletingCommentId(commentId);
+      await feedService.deleteComment(commentId);
+
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      setPost((prev) => ({
+        ...prev,
+        comments: Math.max(0, prev.comments - 1),
+      }));
+    } catch (err) {
+      Alert.alert(
+        "Error",
+        "No se pudo eliminar el comentario. Intenta de nuevo.",
+      );
+    } finally {
+      setDeletingCommentId(null);
+    }
+  }, []);
+
+  const openDeleteCommentSheet = useCallback((comment: FeedComment) => {
+    setCommentToDelete(comment);
+    setDeleteSheetOpen(true);
+  }, []);
+
+  const closeDeleteCommentSheet = useCallback(() => {
+    if (deletingCommentId) return;
+    setDeleteSheetOpen(false);
+    setCommentToDelete(null);
+  }, [deletingCommentId]);
+
+  const confirmDeleteComment = useCallback(async () => {
+    if (!commentToDelete) return;
+
+    await handleDeleteComment(commentToDelete.id);
+
+    setDeleteSheetOpen(false);
+    setCommentToDelete(null);
+  }, [commentToDelete, handleDeleteComment]);
 
   const formatFeedTime = useCallback((iso?: string) => {
     if (!iso) return "";
@@ -109,13 +140,15 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   }, []);
 
   const mapComment = useCallback(
-    (comment: Comment): FeedComment => ({
-      id: comment.id,
-      author: getAuthorName(comment.author),
-      avatarUrl: comment.author?.image_url ?? undefined,
-      text: comment.content,
-      timeLabel: formatFeedTime(comment.created_at),
-    }),
+    (comment: Comment): FeedComment =>
+      ({
+        id: comment.id,
+        authorId: comment.author?.id,
+        author: getAuthorName(comment.author),
+        avatarUrl: comment.author?.image_url ?? undefined,
+        text: comment.content,
+        timeLabel: formatFeedTime(comment.created_at),
+      }) as FeedComment,
     [formatFeedTime, getAuthorName],
   );
 
@@ -184,6 +217,7 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
       const response = await feedService.createComment(post.id, {
         content: trimmed,
       });
+
       const profile = session?.user?.profile;
       const fallbackAuthor = profile
         ? {
@@ -194,6 +228,7 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             image_url: profile.photo_url || undefined,
           }
         : undefined;
+
       const responseComment = response.data;
       const normalizedComment: Comment = responseComment.author
         ? responseComment
@@ -201,6 +236,7 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             ...responseComment,
             author: fallbackAuthor,
           };
+
       const newComment = mapComment(normalizedComment);
 
       setComments((prev) => [...prev, newComment]);
@@ -358,15 +394,8 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             </View>
           ) : (
             comments.map((c) => {
-              // Considera propio si el id de autor coincide con el de sesión
-              const isMine =
-                myUserId &&
-                c.id &&
-                (c.id === myUserId ||
-                  c.author ===
-                    session?.user?.profile?.first_name +
-                      " " +
-                      session?.user?.profile?.last_name);
+              const isMine = !!myUserId && (c as any).authorId === myUserId;
+
               return (
                 <View key={c.id} style={styles.commentItem}>
                   <Avatar
@@ -379,22 +408,10 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                         {c.author}
                       </Text>
                       <Text style={styles.commentTime}>{c.timeLabel}</Text>
+
                       {isMine && (
                         <TouchableOpacity
-                          onPress={() =>
-                            Alert.alert(
-                              "Eliminar comentario",
-                              "¿Seguro que quieres eliminar este comentario?",
-                              [
-                                { text: "Cancelar", style: "cancel" },
-                                {
-                                  text: "Eliminar",
-                                  style: "destructive",
-                                  onPress: () => handleDeleteComment(c.id),
-                                },
-                              ],
-                            )
-                          }
+                          onPress={() => openDeleteCommentSheet(c)}
                           disabled={deletingCommentId === c.id}
                           style={{
                             marginLeft: 8,
@@ -409,6 +426,7 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                         </TouchableOpacity>
                       )}
                     </View>
+
                     <Text style={styles.commentText}>{c.text}</Text>
                   </View>
                 </View>
@@ -427,6 +445,19 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           sending={sendingComment}
         />
       </KeyboardAvoidingView>
+
+      <ConfirmActionSheet
+        visible={deleteSheetOpen}
+        onClose={closeDeleteCommentSheet}
+        onConfirm={confirmDeleteComment}
+        loading={!!deletingCommentId}
+        title="Eliminar comentario"
+        description="¿Seguro que quieres eliminar este comentario? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        tone="destructive"
+        icon={<Trash2 size={18} color="#D92D20" />}
+      />
     </View>
   );
 };
