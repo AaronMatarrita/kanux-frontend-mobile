@@ -11,7 +11,7 @@ export type TabNavigatorParamList = {
 };
 
 export type FeedStackParamList = {
-  FeedList: undefined;
+  FeedList: { updatedPost?: FeedPost } | undefined;
   FeedPostDetail: { post: FeedPost; focusComments?: boolean };
 };
 

@@ -222,8 +222,13 @@ export const feedService = {
    * Get all comments for a post (requires auth)
    */
   getCommentsByPost: async (postId: string): Promise<Comment[]> => {
-    const res = await httpClient.get<Comment[]>(`/feed/${postId}/all-comment`);
-    return res.data;
+    const res = await httpClient.get<Comment[] | { data?: Comment[] }>(
+      `/feed/${postId}/all-comment`,
+    );
+    const payload = res.data;
+    if (Array.isArray(payload)) return payload;
+    if (payload?.data && Array.isArray(payload.data)) return payload.data;
+    return [];
   },
 
   // ========== Reactions ==========

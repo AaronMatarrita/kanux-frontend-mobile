@@ -7,19 +7,22 @@ interface CommentInputProps {
   onSend: (message: string) => void;
   placeholder?: string;
   autoFocus?: boolean;
+  sending?: boolean;
 }
 
 const CommentInput: React.FC<CommentInputProps> = ({
   onSend,
   placeholder = "Escribe un comentario...",
   autoFocus = false,
+  sending = false,
 }) => {
   const [message, setMessage] = useState("");
 
   const hasText = message.trim().length > 0;
+  const canSend = hasText && !sending;
 
   const handleSend = () => {
-    if (!hasText) return;
+    if (!canSend) return;
     onSend(message.trim());
     setMessage("");
   };
@@ -36,21 +39,22 @@ const CommentInput: React.FC<CommentInputProps> = ({
           multiline
           autoFocus={autoFocus}
           maxLength={500}
+          editable={!sending}
         />
 
         <TouchableOpacity
           onPress={handleSend}
-          activeOpacity={hasText ? 0.7 : 1}
+          activeOpacity={canSend ? 0.7 : 1}
           style={[
             styles.sendButton,
-            hasText ? styles.sendEnabled : styles.sendDisabled,
+            canSend ? styles.sendEnabled : styles.sendDisabled,
           ]}
-          disabled={!hasText}
+          disabled={!canSend}
         >
           <AppIcon
             name="send"
             size={18}
-            color={hasText ? colors.white : colors.gray500}
+            color={canSend ? colors.white : colors.gray500}
           />
         </TouchableOpacity>
       </View>

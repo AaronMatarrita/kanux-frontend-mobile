@@ -11,12 +11,14 @@ type Props = {
   post: FeedPost;
   onPress?: (post: FeedPost) => void;
   onCommentsPress?: (post: FeedPost) => void;
+  onReactionPress?: (post: FeedPost) => void;
 };
 
 export const FeedPostCard: React.FC<Props> = ({
   post,
   onPress,
   onCommentsPress,
+  onReactionPress,
 }) => {
   const heartColor = post.isLikedByMe ? colors.primary : colors.gray600;
 
@@ -44,15 +46,29 @@ export const FeedPostCard: React.FC<Props> = ({
 
       <View style={styles.actionsRow}>
         <View style={styles.actionsLeft}>
-          <View style={[styles.actionChip, styles.actionChipSpacer]}>
+          <TouchableOpacity
+            activeOpacity={0.75}
+            style={[
+              styles.actionChip,
+              styles.actionChipSpacer,
+              post.isLikedByMe ? styles.actionChipActive : null,
+            ]}
+            onPress={onReactionPress ? () => onReactionPress(post) : undefined}
+            disabled={!onReactionPress}
+          >
             <Heart size={16} color={heartColor} strokeWidth={1.6} />
             <Text style={styles.actionText}>{post.reactions}</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.actionChip}>
+          <TouchableOpacity
+            activeOpacity={0.75}
+            style={styles.actionChip}
+            onPress={onCommentsPress ? () => onCommentsPress(post) : undefined}
+            disabled={!onCommentsPress}
+          >
             <MessageCircle size={16} color={colors.gray600} strokeWidth={1.6} />
             <Text style={styles.actionText}>{post.comments}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 

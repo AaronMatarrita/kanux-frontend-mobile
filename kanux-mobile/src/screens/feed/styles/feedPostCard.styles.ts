@@ -53,6 +53,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gray100,
   },
+  actionChipActive: {
+    borderColor: "rgba(220, 38, 38, 0.25)",
+    backgroundColor: "rgba(220, 38, 38, 0.08)",
+  },
   actionChipSpacer: {
     marginRight: spacing.sm,
   },

@@ -168,6 +168,47 @@ export const useFeed = () => {
     loadPosts({ page: page + 1, mode: "append" });
   }, [hasMore, loadPosts, loading, loadingMore, page, refreshing]);
 
+  const toggleReaction = useCallback(async (postId: string) => {
+    let snapshot: FeedPost | undefined;
+
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        snapshot = post;
+        const nextLiked = !post.isLikedByMe;
+        return {
+          ...post,
+          isLikedByMe: nextLiked,
+          reactions: Math.max(0, post.reactions + (nextLiked ? 1 : -1)),
+        };
+      }),
+    );
+
+    try {
+      await feedService.toggleReaction(postId);
+    } catch (err) {
+      console.error("Error toggling reaction:", err);
+      if (snapshot) {
+        setPosts((prev) =>
+          prev.map((post) => {
+            if (post.id === postId && snapshot) {
+              return snapshot;
+            }
+            return post;
+          }),
+        );
+      }
+    }
+  }, []);
+
+  const updatePost = useCallback((updated: FeedPost) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === updated.id ? { ...post, ...updated } : post,
+      ),
+    );
+  }, []);
+
   return {
     posts,
     loading,
@@ -178,5 +219,7 @@ export const useFeed = () => {
     refresh,
     retry,
     loadMore,
+    toggleReaction,
+    updatePost,
   };
 };

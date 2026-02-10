@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View, FlatList, ActivityIndicator } from "react-native";
 import { PenSquare, Search } from "lucide-react-native";
@@ -28,10 +28,20 @@ const FeedScreen: React.FC = () => {
     refresh,
     retry,
     loadMore,
+    toggleReaction,
+    updatePost,
   } = useFeed();
 
   const navigation = useNavigation<FeedScreenNavigationProp>();
+  const route = useRoute();
   const isInitialLoading = loading && posts.length === 0 && !refreshing;
+
+  useEffect(() => {
+    const params = (route.params || {}) as { updatedPost?: FeedPost };
+    if (!params.updatedPost) return;
+    updatePost(params.updatedPost);
+    navigation.setParams({ updatedPost: undefined });
+  }, [navigation, route.params, updatePost]);
 
   return (
     <View style={[commonStyles.container, styles.container]}>
@@ -90,6 +100,7 @@ const FeedScreen: React.FC = () => {
                   focusComments: true,
                 })
               }
+              onReactionPress={(post: FeedPost) => toggleReaction(post.id)}
             />
           )}
         />
