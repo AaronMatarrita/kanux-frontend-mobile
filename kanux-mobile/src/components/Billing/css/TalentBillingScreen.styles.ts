@@ -5,8 +5,19 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+
+  contentContainer: {
     paddingHorizontal: 16,
     paddingTop: 16,
+    paddingBottom: 24,
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.textColors.primary,
+    marginBottom: 4,
   },
 
   title: {
@@ -16,9 +27,9 @@ export const styles = StyleSheet.create({
   },
 
   subtitle: {
-    marginTop: 4,
-    marginBottom: 16,
-    fontSize: 17,
+    marginBottom: 20,
+    fontSize: 15,
+    lineHeight: 22,
     color: colors.textColors.secondary,
   },
 

@@ -1,5 +1,8 @@
 import { ScrollView } from "react-native";
 import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { ProfileStackParamList } from "@navigation";
 import Header from "@/components/ui/Header";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { spacing } from "@/theme";
@@ -13,11 +16,15 @@ import { AboutSection } from "@/screens/profile/components/sections/AboutSection
 import { BasicInfoSection } from "@/screens/profile/components/sections/BasicInfoSection";
 import { SkillsSection } from "@/screens/profile/components/sections/SkillsSection";
 import { ActivitySection } from "@/screens/profile/components/sections/ActivitySection";
+import { SettingsSection } from "@/screens/profile/components/sections/SettingsSection";
 
 import { useTalentProfile } from "./hooks/useTalentProfile";
 import { useProfileEdits } from "./hooks/useProfileEdits";
 
+type ProfileScreenNavigationProp = NativeStackNavigationProp<ProfileStackParamList, "ProfileMain">;
+
 export default function ProfileScreen() {
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
   const [tab, setTab] = useState<"resume" | "skills" | "activity">("resume");
   const {
     profile,
@@ -106,6 +113,8 @@ export default function ProfileScreen() {
         )}
 
         {tab === "activity" && <ActivitySection />}
+
+        <SettingsSection onBillingPress={() => navigation.navigate("Billing")} />
       </ScrollView>
 
       <ProfileEditModals

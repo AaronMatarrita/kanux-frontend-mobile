@@ -15,14 +15,12 @@ interface BillingHeaderProps {
   title: string;
   subtitle?: string;
   onBack: () => void;
-  onMenuPress?: () => void;
 }
 
 const BillingHeader: React.FC<BillingHeaderProps> = ({
   title,
   subtitle,
   onBack,
-  onMenuPress,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -57,20 +55,7 @@ const BillingHeader: React.FC<BillingHeaderProps> = ({
 
           <View style={styles.textContainer}>
             <Text style={styles.title}>{title}</Text>
-
           </View>
-
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onMenuPress}
-            activeOpacity={0.7}
-          >
-            <AppIcon
-              name="ellipsis-vertical"
-              size={22}
-              color={colors.textColors.inverted}
-            />
-          </TouchableOpacity>
         </View>
       </View>
     </>

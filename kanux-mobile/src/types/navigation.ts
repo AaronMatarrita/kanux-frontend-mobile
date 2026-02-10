@@ -7,7 +7,11 @@ export type TabNavigatorParamList = {
   Messages: undefined;
   Profile: undefined;
   Skills:undefined;
-  Billing:undefined;
+};
+
+export type ProfileStackParamList = {
+  ProfileMain: undefined;
+  Billing: undefined;
 };
 
 export type RootNavigatorParamList = {

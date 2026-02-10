@@ -6,13 +6,12 @@ import type {
   RootNavigatorParamList,
 } from "@navigation";
 import { MessagesNavigator } from "../screens/messages/navigations/MessageNavigations";
+import { ProfileNavigator } from "../screens/profile/navigations/ProfileNavigator";
 // Screens
 import HomeScreen from "@screens/home/HomeScreen";
 import FeedScreen from "@screens/feed/FeedScreen";
 import ChallengesStack from "@/screens/challenges/ChallengesStack";
-import ProfileScreen from "@screens/profile/ProfileScreen";
 import SkillsScreen from "@/screens/skills/SkillsScreen";
-import BillingScreen from "@/screens/billing/TalentBillingScreen";
 
 // Components
 import BottomNavigationBar from "@components/navigations/BottomNavigationBar";
@@ -34,8 +33,7 @@ const TabNavigator: React.FC = () => {
       <Tab.Screen name="Challenges" component={ChallengesStack} />
       <Tab.Screen name="Messages" component={MessagesNavigator} />
       <Tab.Screen name="Skills" component={SkillsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Billing" component={BillingScreen} />
+      <Tab.Screen name="Profile" component={ProfileNavigator} />
     </Tab.Navigator>
   );
 };
