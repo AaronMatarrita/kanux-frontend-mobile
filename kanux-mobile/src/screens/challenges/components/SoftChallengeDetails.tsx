@@ -1,8 +1,11 @@
 import React from 'react';
-import {View,Text,ScrollView,StyleSheet,TouchableOpacity} from 'react-native';
-import {Clock,HelpCircle,Play,Building2,BarChart3,Activity, BrainCircuit} from 'lucide-react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Clock, HelpCircle, Play, Building2, BarChart3, Activity, BrainCircuit } from 'lucide-react-native';
 import { colors } from '@theme';
 import { Card } from '@/components/ui/Card';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ChallengesStackParamList } from '@/types/navigation';
+import { useNavigation } from '@react-navigation/native';
 
 interface SoftDetailsProps {
     data: any;
@@ -11,22 +14,31 @@ interface SoftDetailsProps {
 export const SoftChallengeDetails: React.FC<SoftDetailsProps> = ({
     data,
 }) => {
+    const navigation = useNavigation<NativeStackNavigationProp<ChallengesStackParamList>>();
+
+    const handleStart = () => {
+        console.log(data);
+        if (!data?.id) return;
+        navigation.navigate("ChallengeRun", {
+            challengeId: data.id
+        });
+    };
     return (
         <View style={styles.mainContainer}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 <Card variant={"shadow"} style={styles.heroCard}>
                     <View style={styles.heroHeader}>
                         <View style={styles.iconContainer}>
-                            <BrainCircuit size={24} color={colors.primary}/>
+                            <BrainCircuit size={24} color={colors.primary} />
                         </View>
                         <View style={styles.heroTextContainer}>
                             <Text style={styles.mainTitle}>
-                                 {data?.title || "Habilidades Blandas"}
+                                {data?.title || "Habilidades Blandas"}
                             </Text>
                             {/* details */}
                             <View style={styles.badgeRow}>
                                 <View style={styles.tag}>
-                                    <Clock size={12} color="#64748b"/>
+                                    <Clock size={12} color="#64748b" />
                                     <Text style={styles.tagText}>
                                         {data?.duration_minutes} m
                                     </Text>
@@ -44,15 +56,15 @@ export const SoftChallengeDetails: React.FC<SoftDetailsProps> = ({
                             </View>
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8}>
-                        <Play size={18} color="#fff" fill="#fff"/>
+                    <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8} onPress={handleStart}>
+                        <Play size={18} color="#fff" fill="#fff" />
                         <Text style={styles.buttonText}>
                             Iniciar desafío
                         </Text>
                     </TouchableOpacity>
                 </Card>
 
-                {/* ACERCA DEL DESAFÍO */}
+                {/* about challenge */}
                 <Text style={styles.sectionLabel}>
                     Acerca del desafío
                 </Text>
@@ -78,7 +90,7 @@ export const SoftChallengeDetails: React.FC<SoftDetailsProps> = ({
                     </View>
                 </Card>
 
-                {/* RESUMEN */}
+                {/* sumary */}
                 <Text style={styles.sectionLabel}>
                     Resumen del desafío
                 </Text>

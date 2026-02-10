@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ChallengesScreen from "./ChallengeStack/ChallengesScreen";
 import ChallengesDetailsScreen from "./ChallengeStack/ChallengesDetailsScreen"
 import { ChallengesStackParamList } from "@/types/navigation";
+import { SoftChallengeExecutionScreen } from "./ChallengeStack/ChallengeRun";
 
 const Stack = createNativeStackNavigator<ChallengesStackParamList>();
 
@@ -17,6 +18,11 @@ const ChallengesStack: React.FC = () => {
       <Stack.Screen
         name="ChallengeDetail"
         component={ChallengesDetailsScreen}
+      />
+      <Stack.Screen 
+        name="ChallengeRun"
+        component={SoftChallengeExecutionScreen} 
+        options={{ headerShown: false }} 
       />
     </Stack.Navigator>
   );
