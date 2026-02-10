@@ -29,7 +29,7 @@ export const SoftChallengeResultsScreen: React.FC = () => {
 
                 {/* hero section */}
                 <View style={[styles.hero, isPassed ? styles.heroSuccess : styles.heroFail]}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <TouchableOpacity onPress={() => navigation.navigate("ChallengesList")} style={styles.backButton}>
                         <ChevronLeft color={colors.white} size={28} />
                     </TouchableOpacity>
 
