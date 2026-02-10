@@ -81,7 +81,7 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   return (
     <View style={[commonStyles.container, styles.container]}>
       <Header
-        title="Detalle"
+        title=""
         leftIcon={<ArrowLeft size={22} color={colors.textColors.inverted} />}
         onLeftPress={() => navigation.goBack()}
       />
