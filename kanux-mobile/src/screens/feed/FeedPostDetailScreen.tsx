@@ -44,7 +44,9 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [sendingComment, setSendingComment] = useState(false);
-  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
+    null,
+  );
   const myUserId = session?.user?.id;
   const handleDeleteComment = useCallback(
     async (commentId: string) => {
@@ -189,7 +191,7 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
             first_name: profile.first_name,
             last_name: profile.last_name,
             title: profile.title,
-            image_url: profile.photo_url || profile.image_url || undefined,
+            image_url: profile.photo_url || undefined,
           }
         : undefined;
       const responseComment = response.data;
@@ -357,7 +359,14 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           ) : (
             comments.map((c) => {
               // Considera propio si el id de autor coincide con el de sesión
-              const isMine = myUserId && c.id && (c.id === myUserId || c.author === session?.user?.profile?.first_name + ' ' + session?.user?.profile?.last_name);
+              const isMine =
+                myUserId &&
+                c.id &&
+                (c.id === myUserId ||
+                  c.author ===
+                    session?.user?.profile?.first_name +
+                      " " +
+                      session?.user?.profile?.last_name);
               return (
                 <View key={c.id} style={styles.commentItem}>
                   <Avatar
@@ -387,7 +396,10 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                             )
                           }
                           disabled={deletingCommentId === c.id}
-                          style={{ marginLeft: 8, opacity: deletingCommentId === c.id ? 0.5 : 1 }}
+                          style={{
+                            marginLeft: 8,
+                            opacity: deletingCommentId === c.id ? 0.5 : 1,
+                          }}
                         >
                           {deletingCommentId === c.id ? (
                             <ActivityIndicator size={16} color="#DC2626" />

@@ -61,12 +61,16 @@ const getLatestComment = (comments?: Comment[]) => {
   return mapComment(sorted[0]);
 };
 
-const mapPost = (post: Post): FeedPost => {
+import { useAuth } from "@/context/AuthContext";
+
+const mapPost = (post: Post, myUserId?: string): FeedPost => {
   const commentsCount = post.commentsCount ?? post.comments?.length ?? 0;
   const reactionsCount = post.reactionsCount ?? post.reactions?.length ?? 0;
-
   const commentsList = (post.comments ?? []).map(mapComment);
-
+  const isOwner =
+    post.isOwner === true ||
+    post.author?.id === myUserId ||
+    post.user_id === myUserId;
   return {
     id: post.id,
     author: getAuthorName(post.author),
@@ -78,6 +82,7 @@ const mapPost = (post: Post): FeedPost => {
     latestComment: getLatestComment(post.comments),
     isLikedByMe: post.isLikedByMe ?? false,
     commentsList,
+    isOwner,
   };
 };
 
@@ -97,6 +102,8 @@ const mergePosts = (current: FeedPost[], incoming: FeedPost[]) => {
 };
 
 export const useFeed = () => {
+  const { session } = useAuth();
+  const myUserId = session?.user?.id;
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -123,7 +130,7 @@ export const useFeed = () => {
           limit: PAGE_SIZE,
         });
 
-        const mapped = response.data.map(mapPost);
+        const mapped = response.data.map((p) => mapPost(p, myUserId));
 
         if (mode === "replace" || mode === "refresh") {
           setPosts(mapped);
@@ -148,7 +155,7 @@ export const useFeed = () => {
         setLoadingMore(false);
       }
     },
-    [],
+    [myUserId],
   );
 
   useEffect(() => {
@@ -209,6 +216,10 @@ export const useFeed = () => {
     );
   }, []);
 
+  const removePost = useCallback((id: string) => {
+    setPosts((prev) => prev.filter((post) => post.id !== id));
+  }, []);
+
   return {
     posts,
     loading,
@@ -221,5 +232,6 @@ export const useFeed = () => {
     loadMore,
     toggleReaction,
     updatePost,
+    removePost,
   };
 };

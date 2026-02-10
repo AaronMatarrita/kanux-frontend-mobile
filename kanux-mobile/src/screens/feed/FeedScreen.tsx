@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { View, FlatList, ActivityIndicator } from "react-native";
+import { View, FlatList, ActivityIndicator, Alert } from "react-native";
 import { PenSquare, Search } from "lucide-react-native";
 import Header from "@/components/ui/Header";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -11,6 +11,7 @@ import { FeedSkeleton } from "./components/FeedSkeleton";
 import styles from "./styles/feedScreen.styles";
 import { useFeed } from "./hooks/useFeed";
 import { FeedPost } from "./types";
+import { feedService } from "@/services/feed.service";
 import { FeedStackParamList } from "@/types/navigation";
 
 type FeedScreenNavigationProp = NativeStackNavigationProp<
@@ -30,7 +31,39 @@ const FeedScreen: React.FC = () => {
     loadMore,
     toggleReaction,
     updatePost,
+    removePost,
   } = useFeed();
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const handleDeletePost = async (post: FeedPost) => {
+    Alert.alert(
+      "Eliminar post",
+      "¿Seguro que quieres eliminar este post?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            setDeletingId(post.id);
+            try {
+              await feedService.deletePost(post.id);
+              removePost(post.id);
+            } catch (err) {
+              Alert.alert("Error", "No se pudo eliminar el post.");
+            } finally {
+              setDeletingId(null);
+            }
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const handleEditPost = (post: FeedPost) => {
+    navigation.navigate("EditPost", { post });
+  };
 
   const navigation = useNavigation<FeedScreenNavigationProp>();
   const route = useRoute();
@@ -50,7 +83,7 @@ const FeedScreen: React.FC = () => {
         leftIcon={<Search size={22} color={colors.textColors.inverted} />}
         rightIcon={<PenSquare size={22} color={colors.textColors.inverted} />}
         onLeftPress={() => undefined}
-        onRightPress={() => undefined}
+        onRightPress={() => navigation.navigate("CreatePost")}
       />
 
       {isInitialLoading ? (
@@ -101,6 +134,8 @@ const FeedScreen: React.FC = () => {
                 })
               }
               onReactionPress={(post: FeedPost) => toggleReaction(post.id)}
+              onDeletePress={handleDeletePost}
+              onEditPress={handleEditPost}
             />
           )}
         />
