@@ -5,6 +5,7 @@ import Header from "@/components/ui/Header";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { colors, commonStyles } from "@/theme";
 import { FeedPostCard } from "./components/FeedPostCard";
+import { FeedSkeleton } from "./components/FeedSkeleton";
 import styles from "./styles/feedScreen.styles";
 import { useFeed } from "./hooks/useFeed";
 
@@ -33,9 +34,7 @@ const FeedScreen: React.FC = () => {
       />
 
       {isInitialLoading ? (
-        <View style={styles.stateContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <FeedSkeleton />
       ) : error && posts.length === 0 ? (
         <EmptyState
           title="No se pudo cargar el feed"
