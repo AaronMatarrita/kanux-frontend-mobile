@@ -30,9 +30,11 @@ export type ChallengeSubmission = {
 export function useChallengesList() {
   const store = useChallengesCache();
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadChallenges = useCallback(
     async (type: "all" | "technical" | "soft", page: number, limit: number) => {
+      setError(null);
       const results = {
         technical: [] as Challenge[],
         soft: [] as Challenge[],
@@ -61,6 +63,7 @@ export function useChallengesList() {
 
         return results;
       } catch (err) {
+        setError("Error al cargar los challenges.");
         results.error = "Error al cargar los challenges.";
         return results;
       }
@@ -70,11 +73,13 @@ export function useChallengesList() {
 
   const loadHistory = useCallback(async () => {
     setLoadingHistory(true);
+    setError(null);
     try {
       const response = await challengesService.getMyChallengeHistory();
       return response as ChallengeSubmission[];
     } catch (err) {
       console.error("Error loading history:", err);
+      setError("Ocurrió un error al cargar los datos.")
       return [];
     } finally {
       setLoadingHistory(false);
@@ -90,6 +95,6 @@ export function useChallengesList() {
     loadHistory,
     clearCache,
     isLoading: store.loadingTechnical || store.loadingSoft || loadingHistory,
-    error: store.error,
+    error: error,
   };
 }

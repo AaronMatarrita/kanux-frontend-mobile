@@ -187,6 +187,40 @@ export interface TechnicalChallengeExecutionResult {
   exitCode?: number;
 }
 
+export interface ChallengeFeedbackPayload {
+  type?: string;
+  title?: string;
+  summary?: string;
+  final_score?: number;
+  score_breakdown?: Record<string, number>;
+  strengths?: string[];
+  areas_for_improvement?: string[];
+  next_steps?: string[];
+  answers_overview?: {
+    total?: number;
+    correct?: number;
+    incorrect?: number;
+  };
+  per_question_feedback?: Array<{
+    question_id?: string;
+    correct?: boolean;
+    explanation?: string;
+  }>;
+  tests?: Record<string, unknown>;
+  code_quality?: Record<string, number>;
+  tags?: string[];
+  markdown?: string;
+}
+export interface ChallengeFeedbackWrapper {
+  id?: string;
+  submission_id?: string;
+  feedback?: ChallengeFeedbackPayload | string;
+  created_at?: string;
+}
+export interface ChallengeLatestFeedbackResponse {
+  success: boolean;
+  data: ChallengeFeedbackWrapper;
+}
 // ============================================================================
 // Service
 // ============================================================================
@@ -518,5 +552,16 @@ export const challengesService = {
       : `/challenges/questions/${questionId}/options`;
     const res = await httpClient.post(url, data);
     return res.data;
+  },
+    /**
+   * GET /challenges/feedback/:submissionId/latest
+   */
+  getLatestChallengeFeedback: async (
+    submissionId: string,
+  ): Promise<ChallengeFeedbackWrapper> => {
+    const res = await httpClient.get<ChallengeLatestFeedbackResponse>(
+      `/challenges/feedback/${submissionId}/latest`,
+    );
+    return res.data.data;
   },
 };

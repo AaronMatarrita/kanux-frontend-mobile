@@ -8,6 +8,8 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ChallengesStackParamList } from '@/types/navigation';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SoftChallengeSkeleton } from '../components/ChallengeRunSkeleton';
+import Header from '@/components/ui/Header';
+import { RetryState } from '@/components/ui/RetryState';
 
 export const SoftChallengeExecutionScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ChallengesStackParamList>>();
@@ -25,17 +27,19 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
         timeLeft,
         isSubmitting,
         setIsSubmitting,
-        profileId
+        profileId,
+        error,
+        load
     } = useSoftChallengeExecution(challengeId);
 
-    // 1. Redirección automática si el tiempo llega a 0
+    // redirect automatic
     useEffect(() => {
         if (!loading && challenge && timeLeft === 0) {
             Alert.alert(
                 "Tiempo agotado",
                 "El tiempo ha finalizado. Serás redirigido a los detalles.",
-                [{ 
-                    text: "Entendido", 
+                [{
+                    text: "Entendido",
                     onPress: () => navigation.pop()
                 }]
             );
@@ -48,26 +52,21 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
             "Si sales ahora, se perderá tu progreso actual.",
             [
                 { text: "Cancelar", style: "cancel" },
-                { 
-                    text: "Salir", 
-                    style: "destructive", 
+                {
+                    text: "Salir",
+                    style: "destructive",
                     onPress: () => navigation.pop()
                 }
             ]
         );
     };
 
-    if (loading || !challenge) {
-        return (
-            <SoftChallengeSkeleton/>
-        );
-    }
 
-    const questions = challenge.non_technical_challenges[0].non_technical_questions;
-    const currentQuestion = questions[currentStep];
-    const totalQuestions = questions.length;
-    const progress = (Object.keys(answers).length / totalQuestions) * 100;
-
+    const questions = challenge?.non_technical_challenges?.[0]?.non_technical_questions || [];
+    const currentQuestion = questions[currentStep] || null;
+    const totalQuestions = questions.length || 0;
+    const progress = totalQuestions > 0 ? (Object.keys(answers).length / totalQuestions) * 100 : 0;
+    
     const handleFinish = async () => {
         if (Object.keys(answers).length < totalQuestions) {
             Alert.alert("Atención", "Debes responder todas las preguntas.");
@@ -84,12 +83,11 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
                 }))
             });
             console.log(res);
-            
-            // navegation to result
-            // navigation.replace("ChallengeResult", { 
-            //     challengeId: challengeId,
-            //     score: res.score 
-            // });
+
+            //navegation to result
+            navigation.replace("ChallengeResult", {
+                submissionId: res.submission_id
+            });
         } catch (err) {
             Alert.alert("Error", "No se pudo enviar el desafío.");
         } finally {
@@ -98,118 +96,127 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
     };
 
     return (
-        <View style={styles.mainContainer}>
-            {/* --- HEADER --- */}
-            <View style={styles.header}>
-                <View style={styles.headerTopRow}>
-                    <TouchableOpacity 
-                        onPress={handleExitWithWarning}
-                        style={styles.iconButton}
-                    >
-                        <X size={24} color="#64748b" />
-                    </TouchableOpacity>
+        <>
+            <Header
+                title="Desafío"
+                leftIcon={<ChevronLeft color={colors.textColors.inverted} size={24} />}
+                onLeftPress={() => handleExitWithWarning()}
+            />
+            {loading ? (
+                <SoftChallengeSkeleton />
+            ) : error ? (
+                <RetryState
+                    title="Error de conexión"
+                    message="No logramos obtener las preguntas del desafío."
+                    onRetry={() => load()}
+                />
+            ) : (
+                <View style={styles.mainContainer}>
+                    {/* --- HEADER --- */}
+                    <View style={styles.header}>
+                        <View style={styles.headerTopRow}>
+                            <Text style={styles.timerText}>
+                                ⏳ {formatTime()}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={handleFinish}
+                                disabled={isSubmitting}
+                            >
+                                <Text style={[
+                                    styles.submitText,
+                                    isSubmitting && styles.submitTextDisabled
+                                ]}>
+                                    {isSubmitting ? "..." : "Enviar"}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
 
-                    <Text style={styles.timerText}>
-                        ⏳ {formatTime()}
-                    </Text>
+                        {/* progress bar */}
+                        <View style={styles.progressTrack}>
+                            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+                        </View>
+                    </View>
 
-                    <TouchableOpacity 
-                        onPress={handleFinish} 
-                        disabled={isSubmitting}
+                    {/* --- content --- */}
+                    <ScrollView
+                        contentContainerStyle={styles.scrollBody}
+                        showsVerticalScrollIndicator={false}
                     >
-                        <Text style={[
-                            styles.submitText, 
-                            isSubmitting && styles.submitTextDisabled
-                        ]}>
-                            {isSubmitting ? "..." : "Enviar"}
+                        <Text style={styles.stepIndicator}>
+                            Pregunta {currentStep + 1} de {totalQuestions}
                         </Text>
-                    </TouchableOpacity>
-                </View>
 
-                {/* progress bar */}
-                <View style={styles.progressTrack}>
-                    <View style={[styles.progressFill, { width: `${progress}%` }]} />
-                </View>
-            </View>
+                        <Text style={styles.questionTitle}>
+                            {currentQuestion?.question}
+                        </Text>
 
-            {/* --- CONTENIDO --- */}
-            <ScrollView 
-                contentContainerStyle={styles.scrollBody}
-                showsVerticalScrollIndicator={false}
-            >
-                <Text style={styles.stepIndicator}>
-                    Pregunta {currentStep + 1} de {totalQuestions}
-                </Text>
-                
-                <Text style={styles.questionTitle}>
-                    {currentQuestion.question}
-                </Text>
+                        {currentQuestion?.non_technical_question_options?.map((opt) => {
+                            const isSelected = answers[currentQuestion?.id] === opt.id;
+                            return (
+                                <TouchableOpacity
+                                    key={opt.id}
+                                    activeOpacity={0.7}
+                                    style={[
+                                        styles.optionCard,
+                                        isSelected && styles.optionCardSelected
+                                    ]}
+                                    onPress={() => currentQuestion && selectOption(currentQuestion.id, opt.id)}
+                                >
+                                    <View style={[
+                                        styles.radioButton,
+                                        isSelected && styles.radioButtonActive
+                                    ]} />
+                                    <Text style={[
+                                        styles.optionLabel,
+                                        isSelected && styles.optionLabelSelected
+                                    ]}>
+                                        {opt.option_text}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
 
-                {currentQuestion.non_technical_question_options.map((opt) => {
-                    const isSelected = answers[currentQuestion.id] === opt.id;
-                    return (
+                    {/* --- FOOTER --- */}
+                    <View style={styles.footerNav}>
                         <TouchableOpacity
-                            key={opt.id}
-                            activeOpacity={0.7}
-                            style={[
-                                styles.optionCard, 
-                                isSelected && styles.optionCardSelected
-                            ]}
-                            onPress={() => selectOption(currentQuestion.id, opt.id)}
+                            onPress={() => setCurrentStep(prev => prev - 1)}
+                            disabled={currentStep === 0}
+                            style={[styles.navAction, currentStep === 0 && styles.navActionDisabled]}
                         >
-                            <View style={[
-                                styles.radioButton, 
-                                isSelected && styles.radioButtonActive
-                            ]} />
-                            <Text style={[
-                                styles.optionLabel, 
-                                isSelected && styles.optionLabelSelected
-                            ]}>
-                                {opt.option_text}
+                            <ChevronLeft size={20} color={currentStep === 0 ? "#cbd5e1" : colors.primary} />
+                            <Text style={[styles.navActionText, currentStep === 0 && styles.navActionTextDisabled]}>
+                                Anterior
                             </Text>
                         </TouchableOpacity>
-                    );
-                })}
-            </ScrollView>
 
-            {/* --- FOOTER --- */}
-            <View style={styles.footerNav}>
-                <TouchableOpacity
-                    onPress={() => setCurrentStep(prev => prev - 1)}
-                    disabled={currentStep === 0}
-                    style={[styles.navAction, currentStep === 0 && styles.navActionDisabled]}
-                >
-                    <ChevronLeft size={20} color={currentStep === 0 ? "#cbd5e1" : colors.primary} />
-                    <Text style={[styles.navActionText, currentStep === 0 && styles.navActionTextDisabled]}>
-                        Anterior
-                    </Text>
-                </TouchableOpacity>
+                        <View style={styles.paginationDots}>
+                            {questions.map((_, i) => (
+                                <View
+                                    key={i}
+                                    style={[
+                                        styles.dotItem,
+                                        currentStep === i && styles.dotItemActive,
+                                        answers[questions[i].id] && styles.dotItemDone
+                                    ]}
+                                />
+                            ))}
+                        </View>
 
-                <View style={styles.paginationDots}>
-                    {questions.map((_, i) => (
-                        <View 
-                            key={i} 
-                            style={[
-                                styles.dotItem,
-                                currentStep === i && styles.dotItemActive,
-                                answers[questions[i].id] && styles.dotItemDone
-                            ]} 
-                        />
-                    ))}
+                        <TouchableOpacity
+                            onPress={() => setCurrentStep(prev => prev + 1)}
+                            disabled={currentStep === totalQuestions - 1}
+                            style={[styles.navAction, currentStep === totalQuestions - 1 && styles.navActionDisabled]}
+                        >
+                            <Text style={[styles.navActionText, currentStep === totalQuestions - 1 && styles.navActionTextDisabled]}>
+                                Siguiente
+                            </Text>
+                            <ChevronRight size={20} color={currentStep === totalQuestions - 1 ? "#cbd5e1" : colors.primary} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-
-                <TouchableOpacity
-                    onPress={() => setCurrentStep(prev => prev + 1)}
-                    disabled={currentStep === totalQuestions - 1}
-                    style={[styles.navAction, currentStep === totalQuestions - 1 && styles.navActionDisabled]}
-                >
-                    <Text style={[styles.navActionText, currentStep === totalQuestions - 1 && styles.navActionTextDisabled]}>
-                        Siguiente
-                    </Text>
-                    <ChevronRight size={20} color={currentStep === totalQuestions - 1 ? "#cbd5e1" : colors.primary} />
-                </TouchableOpacity>
-            </View>
-        </View>
+            )}
+        </>
     );
 };
 
@@ -225,7 +232,7 @@ const styles = StyleSheet.create({
     },
     header: {
         backgroundColor: '#ffffff',
-        paddingTop: 60,
+        paddingTop: 15,
         paddingHorizontal: 20,
         paddingBottom: 15,
         borderBottomWidth: 1,
