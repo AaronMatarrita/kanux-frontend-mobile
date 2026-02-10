@@ -61,17 +61,12 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
         );
     };
 
-    if (loading || !challenge) {
-        return (
-            <SoftChallengeSkeleton />
-        );
-    }
 
-    const questions = challenge.non_technical_challenges[0].non_technical_questions;
-    const currentQuestion = questions[currentStep];
-    const totalQuestions = questions.length;
-    const progress = (Object.keys(answers).length / totalQuestions) * 100;
-
+    const questions = challenge?.non_technical_challenges?.[0]?.non_technical_questions || [];
+    const currentQuestion = questions[currentStep] || null;
+    const totalQuestions = questions.length || 0;
+    const progress = totalQuestions > 0 ? (Object.keys(answers).length / totalQuestions) * 100 : 0;
+    
     const handleFinish = async () => {
         if (Object.keys(answers).length < totalQuestions) {
             Alert.alert("Atención", "Debes responder todas las preguntas.");
@@ -152,11 +147,11 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
                         </Text>
 
                         <Text style={styles.questionTitle}>
-                            {currentQuestion.question}
+                            {currentQuestion?.question}
                         </Text>
 
-                        {currentQuestion.non_technical_question_options.map((opt) => {
-                            const isSelected = answers[currentQuestion.id] === opt.id;
+                        {currentQuestion?.non_technical_question_options?.map((opt) => {
+                            const isSelected = answers[currentQuestion?.id] === opt.id;
                             return (
                                 <TouchableOpacity
                                     key={opt.id}
@@ -165,7 +160,7 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
                                         styles.optionCard,
                                         isSelected && styles.optionCardSelected
                                     ]}
-                                    onPress={() => selectOption(currentQuestion.id, opt.id)}
+                                    onPress={() => currentQuestion && selectOption(currentQuestion.id, opt.id)}
                                 >
                                     <View style={[
                                         styles.radioButton,
