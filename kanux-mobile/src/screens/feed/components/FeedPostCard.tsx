@@ -27,7 +27,12 @@ export const FeedPostCard: React.FC<Props> = ({
     >
       <View style={styles.headerRow}>
         <View style={styles.headerLeft}>
-          <Avatar size={32} />
+          <Avatar
+            size={32}
+            source={
+              post.authorAvatarUrl ? { uri: post.authorAvatarUrl } : undefined
+            }
+          />
           <Text style={styles.author}>{post.author}</Text>
         </View>
         <Text style={styles.time}>{post.timeLabel}</Text>
@@ -54,7 +59,14 @@ export const FeedPostCard: React.FC<Props> = ({
       {post.latestComment ? (
         <>
           <View style={styles.commentRow}>
-            <Avatar size={28} />
+            <Avatar
+              size={28}
+              source={
+                post.latestComment?.avatarUrl
+                  ? { uri: post.latestComment.avatarUrl }
+                  : undefined
+              }
+            />
             <View style={styles.commentTextWrap}>
               <Text style={styles.latestLabel}>Último comentario:</Text>
               <Text style={styles.latestText} numberOfLines={1}>

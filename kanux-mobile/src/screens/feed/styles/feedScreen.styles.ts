@@ -18,6 +18,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: spacing.xl,
   },
+  footerLoader: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing.lg,
+  },
   stateTitle: {
     ...typography.body,
     color: colors.textColors.secondary,
