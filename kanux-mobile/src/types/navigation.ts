@@ -1,4 +1,5 @@
 import { ImageSourcePropType } from "react-native";
+import { FeedPost } from "@/screens/feed/types";
 
 export type TabNavigatorParamList = {
   Home: undefined;
@@ -6,7 +7,12 @@ export type TabNavigatorParamList = {
   Challenges: undefined;
   Messages: undefined;
   Profile: undefined;
-  Skills:undefined;
+  Skills: undefined;
+};
+
+export type FeedStackParamList = {
+  FeedList: undefined;
+  FeedPostDetail: { post: FeedPost; focusComments?: boolean };
 };
 
 export type ProfileStackParamList = {

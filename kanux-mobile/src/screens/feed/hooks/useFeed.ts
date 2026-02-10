@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { feedService, type Comment, type Post } from "@/services/feed.service";
-import type { FeedPost } from "../types";
+import type { FeedPost, FeedComment } from "../types";
 
 const PAGE_SIZE = 10;
 
@@ -39,6 +39,16 @@ const getAuthorName = (author?: Post["author"]) => {
   return "Usuario";
 };
 
+const mapComment = (comment: Comment): FeedComment => {
+  return {
+    id: comment.id,
+    author: getAuthorName(comment.author),
+    avatarUrl: comment.author?.image_url ?? undefined,
+    text: comment.content,
+    timeLabel: formatFeedTime(comment.created_at),
+  };
+};
+
 const getLatestComment = (comments?: Comment[]) => {
   if (!comments || comments.length === 0) return undefined;
 
@@ -48,20 +58,14 @@ const getLatestComment = (comments?: Comment[]) => {
     return bTime - aTime;
   });
 
-  const latest = sorted[0];
-
-  return {
-    id: latest.id,
-    author: getAuthorName(latest.author),
-    avatarUrl: latest.author?.image_url ?? undefined,
-    text: latest.content,
-    timeLabel: formatFeedTime(latest.created_at),
-  };
+  return mapComment(sorted[0]);
 };
 
 const mapPost = (post: Post): FeedPost => {
   const commentsCount = post.commentsCount ?? post.comments?.length ?? 0;
   const reactionsCount = post.reactionsCount ?? post.reactions?.length ?? 0;
+
+  const commentsList = (post.comments ?? []).map(mapComment);
 
   return {
     id: post.id,
@@ -72,6 +76,8 @@ const mapPost = (post: Post): FeedPost => {
     reactions: reactionsCount,
     comments: commentsCount,
     latestComment: getLatestComment(post.comments),
+    isLikedByMe: post.isLikedByMe ?? false,
+    commentsList,
   };
 };
 
@@ -79,12 +85,14 @@ const mergePosts = (current: FeedPost[], incoming: FeedPost[]) => {
   const existingIds = new Set(current.map((post) => post.id));
   const merged = [...current];
   let newItems = 0;
+
   incoming.forEach((post) => {
     if (!existingIds.has(post.id)) {
       merged.push(post);
       newItems += 1;
     }
   });
+
   return { merged, newItems };
 };
 
@@ -106,20 +114,15 @@ export const useFeed = () => {
 
       try {
         setError(null);
-        if (mode === "replace") {
-          setLoading(true);
-        }
-        if (mode === "refresh") {
-          setRefreshing(true);
-        }
-        if (mode === "append") {
-          setLoadingMore(true);
-        }
+        if (mode === "replace") setLoading(true);
+        if (mode === "refresh") setRefreshing(true);
+        if (mode === "append") setLoadingMore(true);
 
         const response = await feedService.getAllPosts({
           page: nextPage,
           limit: PAGE_SIZE,
         });
+
         const mapped = response.data.map(mapPost);
 
         if (mode === "replace" || mode === "refresh") {
@@ -137,9 +140,7 @@ export const useFeed = () => {
       } catch (err) {
         console.error("Error loading feed:", err);
         setError("No se pudo cargar el feed. Intenta nuevamente.");
-        if (mode !== "append") {
-          setPosts([]);
-        }
+        if (mode !== "append") setPosts([]);
         setHasMore(false);
       } finally {
         setLoading(false);
