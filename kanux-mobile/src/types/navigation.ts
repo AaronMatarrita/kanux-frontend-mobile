@@ -30,5 +30,5 @@ export type ChallengesStackParamList = {
   ChallengesList: undefined;
   ChallengeDetail: { challengeId: string };
   ChallengeRun: { challengeId: string };
-  ChallengeResult: { challengeId: string; score?: number };
+  ChallengeResult: { submissionId: string; };
 };

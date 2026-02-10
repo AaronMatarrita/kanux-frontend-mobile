@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ChallengesStackParamList } from "@/types/navigation";
 import { ChallengeListSkeleton } from "../components/ChallengesSkeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 
 const ChallengesScreen: React.FC = () => {
@@ -61,26 +62,42 @@ const ChallengesScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
         />
       );
-    }
-
-    return (
-      <FlatList
-        data={history}
-        keyExtractor={(item) => item.submission_id}
-        renderItem={({ item }) => (
-          <ProgressChallengeCard
-            title={item.challenge.title}
-            difficulty={item.challenge.difficulty}
-            date={formatDate(item.submitted_at)}
-            score={item.score}
-            onPress={() => console.log("Detalle", item.submission_id)}
+    } else {
+      if (!history) {
+        return (
+          <EmptyState
+            title="Aún no has completado desafíos."
+            description="Demuestra tu talento realizando retos técnicos y tus habilidades aparecerán aquí automáticamente."
+            iconName="Zap"
           />
-        )}
-        contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-        showsVerticalScrollIndicator={false}
-      />
-    );
+        )
+      }
+
+      return (
+        <FlatList
+          data={history}
+          keyExtractor={(item) => item.submission_id}
+          renderItem={({ item }) => (
+            <ProgressChallengeCard
+              title={item.challenge.title}
+              difficulty={item.challenge.difficulty}
+              date={formatDate(item.submitted_at)}
+              score={item.score}
+              onPress={() => {
+                console.log("Detalle", item.submission_id)
+                navigation.replace("ChallengeResult", {
+                  submissionId: item.submission_id
+                });
+              }
+              }
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+          showsVerticalScrollIndicator={false}
+        />
+      );
+    }
   };
 
   return (

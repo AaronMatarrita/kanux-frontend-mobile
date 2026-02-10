@@ -85,11 +85,10 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
             });
             console.log(res);
             
-            // navegation to result
-            // navigation.replace("ChallengeResult", { 
-            //     challengeId: challengeId,
-            //     score: res.score 
-            // });
+            //navegation to result
+            navigation.replace("ChallengeResult", { 
+                submissionId: res.submission_id
+            });
         } catch (err) {
             Alert.alert("Error", "No se pudo enviar el desafío.");
         } finally {

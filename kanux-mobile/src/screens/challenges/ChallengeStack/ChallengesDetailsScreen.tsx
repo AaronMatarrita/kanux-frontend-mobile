@@ -3,7 +3,7 @@ import { colors, commonStyles, spacing, typography } from "@/theme";
 import { ChallengesStackParamList } from "@/types/navigation";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { ChevronLeft } from "lucide-react-native";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useChallengesDetails } from "../hooks/useChallengesDetails";
 import { TechnicalChallengeDetails } from "../components/TechnicalChallengeDetails";
 import { SoftChallengeDetails } from "../components/SoftChallengeDetails";
