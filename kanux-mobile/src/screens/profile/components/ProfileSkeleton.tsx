@@ -51,6 +51,20 @@ export const ProfileSkeleton: React.FC = () => {
         <SkeletonBlock style={styles.line} />
         <SkeletonBlock style={styles.line} />
       </Card>
+
+      {/* Settings Section Skeleton */}
+      <Card variant="shadow" style={styles.card}>
+        <View style={[styles.settingsHeader]}>
+          <SkeletonBlock style={styles.sectionTitle} />
+        </View>
+        <View style={styles.settingsItem}>
+          <View style={styles.settingsItemLeft}>
+            <SkeletonBlock style={styles.settingsIcon} />
+            <SkeletonBlock style={styles.settingsLabel} />
+          </View>
+          <SkeletonBlock style={styles.settingsChevron} />
+        </View>
+      </Card>
     </View>
   );
 };
@@ -142,5 +156,37 @@ const styles = StyleSheet.create({
     width: "95%",
     height: 10,
     marginBottom: spacing.sm,
+  },
+  settingsHeader: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray100,
+  },
+  settingsItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  settingsItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
+  settingsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+  },
+  settingsLabel: {
+    width: 140,
+    height: 12,
+  },
+  settingsChevron: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
   },
 });
