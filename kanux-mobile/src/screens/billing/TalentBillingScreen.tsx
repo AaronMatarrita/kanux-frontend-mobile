@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { styles } from "../../components/Billing/css/TalentBillingScreen.styles";
 import PlanCard from "../../components/Billing/PlanCard";
 import CurrentPlanDetails from "../../components/Billing/CurrentDetails";
 import ConfirmUpgradeModal from "../../components/Billing/ConfirmUpgrade";
 import BillingHeader from "../../components/Billing/BillingHeader";
+import { BillingSkeleton } from "../../components/Billing/BillingSkeleton";
 import {
   subscriptionsService,
   TalentPlan,
@@ -59,10 +60,13 @@ const planInfo = {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Cargando planes…</Text>
-      </View>
+      <>
+        <BillingHeader
+          title="Planes y suscripción"
+          onBack={() => navigation.goBack()}
+        />
+        <BillingSkeleton />
+      </>
     );
   }
 
@@ -71,44 +75,43 @@ const planInfo = {
       <BillingHeader
         title="Planes y suscripción"
         onBack={() => navigation.goBack()}
-        onMenuPress={() => console.log("Menu billing")}
       />
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <CurrentPlanDetails
+          planName={planInfo.name}
+          billingCycle={planInfo.cycle}
+          nextBillingDate={planInfo.date}
+          paymentMethod={planInfo.method}
+        />
+
+        <Text style={styles.sectionTitle}>Planes disponibles</Text>
         <Text style={styles.subtitle}>
-          {" "}
-          Elige el plan que mejor se adapte a tus objetivos profesionales.{" "}
+          Elige el plan que mejor se adapte a tus objetivos profesionales.
         </Text>
 
-        <FlatList
-          data={plans}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <PlanCard
-              plan={item}
-              isCurrentPlan={item.id === currentPlan?.plan_id}
-              onUpgrade={(id) => {
-                setSelectedPlanId(id);
-                setConfirmVisible(true);
-              }}
-            />
-          )}
-          showsVerticalScrollIndicator={false}
-        />
+        {plans.map((plan) => (
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            isCurrentPlan={plan.id === currentPlan?.plan_id}
+            onUpgrade={(id) => {
+              setSelectedPlanId(id);
+              setConfirmVisible(true);
+            }}
+          />
+        ))}
+      </ScrollView>
 
-        <CurrentPlanDetails
-  planName={planInfo.name}
-  billingCycle={planInfo.cycle}
-  nextBillingDate={planInfo.date}
-  paymentMethod={planInfo.method}
-/>
-
-        <ConfirmUpgradeModal
-          visible={confirmVisible}
-          planId={selectedPlanId}
-          onClose={() => setConfirmVisible(false)}
-          onSuccess={loadData}
-        />
-      </View>
+      <ConfirmUpgradeModal
+        visible={confirmVisible}
+        planId={selectedPlanId}
+        onClose={() => setConfirmVisible(false)}
+        onSuccess={loadData}
+      />
     </>
   );
 };

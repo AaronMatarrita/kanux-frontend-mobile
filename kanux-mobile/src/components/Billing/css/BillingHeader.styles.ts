@@ -33,6 +33,7 @@ export const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     marginHorizontal: 12,
+    alignItems: "center",
   },
 
   title: {
