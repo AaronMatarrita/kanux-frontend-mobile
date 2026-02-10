@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { Alert } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   View,
@@ -17,7 +18,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { ArrowLeft, Heart, MessageCircle } from "lucide-react-native";
+import { ArrowLeft, Heart, MessageCircle, Trash } from "lucide-react-native";
 import Avatar from "@/components/messages/Avatar";
 import Header from "@/components/ui/Header";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -43,6 +44,29 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [sendingComment, setSendingComment] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  const myUserId = session?.user?.id;
+  const handleDeleteComment = useCallback(
+    async (commentId: string) => {
+      try {
+        setDeletingCommentId(commentId);
+        await feedService.deleteComment(commentId);
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+        setPost((prev) => ({
+          ...prev,
+          comments: Math.max(0, prev.comments - 1),
+        }));
+      } catch (err) {
+        Alert.alert(
+          "Error",
+          "No se pudo eliminar el comentario. Intenta de nuevo.",
+        );
+      } finally {
+        setDeletingCommentId(null);
+      }
+    },
+    [feedService],
+  );
 
   const scrollRef = useRef<ScrollView>(null);
   const navigatingBackRef = useRef(false);
@@ -331,23 +355,53 @@ const FeedPostDetailScreen: React.FC<Props> = ({ navigation, route }) => {
               </Text>
             </View>
           ) : (
-            comments.map((c) => (
-              <View key={c.id} style={styles.commentItem}>
-                <Avatar
-                  size={32}
-                  source={c.avatarUrl ? { uri: c.avatarUrl } : undefined}
-                />
-                <View style={styles.commentBubble}>
-                  <View style={styles.commentTopRow}>
-                    <Text style={styles.commentAuthor} numberOfLines={1}>
-                      {c.author}
-                    </Text>
-                    <Text style={styles.commentTime}>{c.timeLabel}</Text>
+            comments.map((c) => {
+              // Considera propio si el id de autor coincide con el de sesión
+              const isMine = myUserId && c.id && (c.id === myUserId || c.author === session?.user?.profile?.first_name + ' ' + session?.user?.profile?.last_name);
+              return (
+                <View key={c.id} style={styles.commentItem}>
+                  <Avatar
+                    size={32}
+                    source={c.avatarUrl ? { uri: c.avatarUrl } : undefined}
+                  />
+                  <View style={styles.commentBubble}>
+                    <View style={styles.commentTopRow}>
+                      <Text style={styles.commentAuthor} numberOfLines={1}>
+                        {c.author}
+                      </Text>
+                      <Text style={styles.commentTime}>{c.timeLabel}</Text>
+                      {isMine && (
+                        <TouchableOpacity
+                          onPress={() =>
+                            Alert.alert(
+                              "Eliminar comentario",
+                              "¿Seguro que quieres eliminar este comentario?",
+                              [
+                                { text: "Cancelar", style: "cancel" },
+                                {
+                                  text: "Eliminar",
+                                  style: "destructive",
+                                  onPress: () => handleDeleteComment(c.id),
+                                },
+                              ],
+                            )
+                          }
+                          disabled={deletingCommentId === c.id}
+                          style={{ marginLeft: 8, opacity: deletingCommentId === c.id ? 0.5 : 1 }}
+                        >
+                          {deletingCommentId === c.id ? (
+                            <ActivityIndicator size={16} color="#DC2626" />
+                          ) : (
+                            <Trash size={18} color="#DC2626" />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    <Text style={styles.commentText}>{c.text}</Text>
                   </View>
-                  <Text style={styles.commentText}>{c.text}</Text>
                 </View>
-              </View>
-            ))
+              );
+            })
           )}
 
           <View style={styles.bottomSpacer} />
