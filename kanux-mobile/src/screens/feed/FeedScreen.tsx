@@ -1,69 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, FlatList, ActivityIndicator } from "react-native";
 import { PenSquare, Search } from "lucide-react-native";
 import Header from "@/components/ui/Header";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { colors, commonStyles } from "@/theme";
 import { FeedPostCard } from "./components/FeedPostCard";
-import { useFeedUiState } from "./hooks/useFeedUiState";
-import { useFeedMock } from "./hooks/useFeedMock";
 import styles from "./styles/feedScreen.styles";
+import { useFeed } from "./hooks/useFeed";
 
 const FeedScreen: React.FC = () => {
-  const { state, setState } = useFeedUiState("ready");
-  const { posts } = useFeedMock();
-  const [refreshing, setRefreshing] = useState(false);
+  const {
+    posts,
+    loading,
+    refreshing,
+    loadingMore,
+    error,
+    refresh,
+    retry,
+    loadMore,
+  } = useFeed();
 
-  const simulateReload = (nextState: "ready" | "empty" | "error" = "ready") => {
-    setTimeout(() => {
-      setState(nextState);
-      setRefreshing(false);
-    }, 600);
-  };
-
-  const handleRetry = () => {
-    setState("loading");
-    simulateReload("ready");
-  };
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    simulateReload("ready");
-  };
-
-  const renderState = () => {
-    if (state === "loading") {
-      return (
-        <View style={styles.stateContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      );
-    }
-
-    if (state === "error") {
-      return (
-        <EmptyState
-          title="No se pudo cargar el feed"
-          description="Revisa tu conexión e intenta de nuevo."
-          iconName="AlertCircle"
-          buttonTitle="Reintentar"
-          onButtonPress={handleRetry}
-        />
-      );
-    }
-
-    if (state === "empty") {
-      return (
-        <EmptyState
-          title="Aún no hay publicaciones"
-          description="Cuando haya actividad, aquí verás las últimas novedades."
-          iconName="Inbox"
-        />
-      );
-    }
-
-    return null;
-  };
+  const isInitialLoading = loading && posts.length === 0 && !refreshing;
 
   return (
     <View style={[commonStyles.container, styles.container]}>
@@ -75,17 +32,43 @@ const FeedScreen: React.FC = () => {
         onRightPress={() => undefined}
       />
 
-      {state !== "ready" ? (
-        renderState()
+      {isInitialLoading ? (
+        <View style={styles.stateContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : error && posts.length === 0 ? (
+        <EmptyState
+          title="No se pudo cargar el feed"
+          description="Revisa tu conexión e intenta de nuevo."
+          iconName="AlertCircle"
+          buttonTitle="Reintentar"
+          onButtonPress={retry}
+        />
       ) : (
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
-          onRefresh={handleRefresh}
+          onRefresh={refresh}
+          onEndReachedThreshold={0.4}
+          onEndReached={loadMore}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.listSeparator} />}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={styles.footerLoader}>
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : null
+          }
+          ListEmptyComponent={
+            <EmptyState
+              title="Aún no hay publicaciones"
+              description="Cuando haya actividad, aquí verás las últimas novedades."
+              iconName="Inbox"
+            />
+          }
           renderItem={({ item }) => (
             <FeedPostCard
               post={item}
