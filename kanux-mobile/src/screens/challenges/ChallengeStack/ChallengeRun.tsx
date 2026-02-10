@@ -98,7 +98,7 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
     return (
         <>
             <Header
-                title="Resultados"
+                title="Desafío"
                 leftIcon={<ChevronLeft color={colors.textColors.inverted} size={24} />}
                 onLeftPress={() => handleExitWithWarning()}
             />
@@ -107,7 +107,7 @@ export const SoftChallengeExecutionScreen: React.FC = () => {
             ) : error ? (
                 <RetryState
                     title="Error de conexión"
-                    message="No logramos obtener los detalles del desafío."
+                    message="No logramos obtener las preguntas del desafío."
                     onRetry={() => load()}
                 />
             ) : (
