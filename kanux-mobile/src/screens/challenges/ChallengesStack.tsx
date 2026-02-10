@@ -2,14 +2,8 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import ChallengesScreen from "./ChallengeStack/ChallengesScreen";
-
-
-export type ChallengesStackParamList = {
-  ChallengesList: undefined;
-  ChallengeDetail: { challengeId: string };
-  ChallengeRun: { challengeId: string };
-  ChallengeResult: { challengeId: string; score?: number };
-};
+import ChallengesDetailsScreen from "./ChallengeStack/ChallengesDetailsScreen"
+import { ChallengesStackParamList } from "@/types/navigation";
 
 const Stack = createNativeStackNavigator<ChallengesStackParamList>();
 
@@ -19,6 +13,10 @@ const ChallengesStack: React.FC = () => {
       <Stack.Screen
         name="ChallengesList"
         component={ChallengesScreen}
+      />
+      <Stack.Screen
+        name="ChallengeDetail"
+        component={ChallengesDetailsScreen}
       />
     </Stack.Navigator>
   );

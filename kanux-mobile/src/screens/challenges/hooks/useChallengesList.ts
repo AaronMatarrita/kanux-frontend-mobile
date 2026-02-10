@@ -1,5 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useChallengesCache } from "../store/challenges.store";
+import { challengesService } from "@/services/challenges.service"; // Asegúrate de importar tu servicio
 
 export interface Challenge {
   id: string;
@@ -10,8 +11,25 @@ export interface Challenge {
   challenge_type?: string;
 }
 
+export type ChallengeSubmission = {
+  submission_id: string;
+  challenge: {
+    id: string;
+    title: string;
+    type: string;
+    difficulty: string;
+    description?: string;
+    duration_minutes?: number;
+  };
+  score: number;
+  status: string;
+  evaluation_type?: string;
+  submitted_at: string;
+};
+
 export function useChallengesList() {
   const store = useChallengesCache();
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const loadChallenges = useCallback(
     async (type: "all" | "technical" | "soft", page: number, limit: number) => {
@@ -26,17 +44,13 @@ export function useChallengesList() {
         if (type === "all" || type === "technical") {
           const tech = await store.getTechnicalChallenges(page, limit);
           results.technical = tech.data;
-          if (type === "technical") {
-            results.totalPages = tech.totalPages;
-          }
+          if (type === "technical") results.totalPages = tech.totalPages;
         }
 
         if (type === "all" || type === "soft") {
           const soft = await store.getSoftChallenges(page, limit);
           results.soft = soft.data;
-          if (type === "soft") {
-            results.totalPages = soft.totalPages;
-          }
+          if (type === "soft") results.totalPages = soft.totalPages;
         }
 
         if (type === "all") {
@@ -47,31 +61,35 @@ export function useChallengesList() {
 
         return results;
       } catch (err) {
-        results.error =
-          "Error al cargar los challenges. Por favor intenta de nuevo.";
-        console.error("Error loading challenges:", err);
+        results.error = "Error al cargar los challenges.";
         return results;
       }
     },
     [store],
   );
 
+  const loadHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    try {
+      const response = await challengesService.getMyChallengeHistory();
+      return response as ChallengeSubmission[];
+    } catch (err) {
+      console.error("Error loading history:", err);
+      return [];
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
   const clearCache = useCallback(() => {
     store.clearCache();
   }, [store]);
 
-  const setExpiry = useCallback(
-    (ms: number) => {
-      store.setCacheExpiry(ms);
-    },
-    [store],
-  );
-
   return {
     loadChallenges,
+    loadHistory,
     clearCache,
-    setExpiry,
-    isLoading: store.loadingTechnical || store.loadingSoft,
+    isLoading: store.loadingTechnical || store.loadingSoft || loadingHistory,
     error: store.error,
   };
 }

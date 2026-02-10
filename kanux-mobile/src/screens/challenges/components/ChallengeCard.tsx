@@ -19,33 +19,12 @@ interface ChallengeCardProps {
     onPress: (id: string) => void;
 }
 
-// set colors difficulty
-const getDifficultyStyles = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-        case 'básico':
-            return { bg: '#ecfdf5', border: '#d1fae5', text: '#059669' };
-        case 'intermedio':
-            return { bg: '#fffbeb', border: '#fef3c7', text: '#d97706' };
-        case 'avanzado':
-            return { bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' };
-        default:
-            return { bg: '#f8fafc', border: '#e2e8f0', text: '#64748b' };
-    }
-};
-
-// set colors and icons
-const getTypeStyles = (type?: string) => {
-    const normalizedType = type?.toLowerCase() || '';
-    if (normalizedType === "técnico") {
-        return { bg: '#eff6ff', border: '#dbeafe', text: '#2563eb', icon: <Code2 size={22} color="#2563eb" /> };
-    }
-    return { bg: '#f5f3ff', border: '#ede9fe', text: '#7c3aed', icon: <BrainCircuit size={22} color="#7c3aed" /> };
-};
-
 export const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onPress }) => {
+
     const diffStyle = getDifficultyStyles(challenge.difficulty);
     const typeStyle = getTypeStyles(challenge.challenge_type);
     const textType = "challenge_type" in challenge && challenge.challenge_type === "Técnico" ? "Desafío de código" : "Habilidades blandas";
+
     return (
         <Card variant="shadow" padding="md" style={styles.card}>
             <View style={styles.header}>
@@ -144,3 +123,26 @@ const styles = StyleSheet.create({
         height: 46
     },
 });
+
+// set colors difficulty
+const getDifficultyStyles = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+        case 'básico':
+            return { bg: '#ecfdf5', border: '#d1fae5', text: '#059669' };
+        case 'intermedio':
+            return { bg: '#fffbeb', border: '#fef3c7', text: '#d97706' };
+        case 'avanzado':
+            return { bg: '#fef2f2', border: '#fee2e2', text: '#dc2626' };
+        default:
+            return { bg: '#f8fafc', border: '#e2e8f0', text: '#64748b' };
+    }
+};
+
+// set colors and icons
+const getTypeStyles = (type?: string) => {
+    const normalizedType = type?.toLowerCase() || '';
+    if (normalizedType === "técnico") {
+        return { bg: '#eff6ff', border: '#dbeafe', text: '#2563eb', icon: <Code2 size={22} color="#2563eb" /> };
+    }
+    return { bg: '#f5f3ff', border: '#ede9fe', text: '#7c3aed', icon: <BrainCircuit size={22} color="#7c3aed" /> };
+};

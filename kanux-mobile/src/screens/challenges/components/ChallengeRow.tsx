@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 11,
         color: '#94a3b8',
-        marginLeft: 0, // Reset de margen para alineación vertical
+        marginLeft: 0,
     },
     actionContainer: {
         alignItems: 'flex-end',
