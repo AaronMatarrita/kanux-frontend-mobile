@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, ViewStyle, Pressable, Text } from "react-native";
+import { View, StyleSheet, ViewStyle, Pressable } from "react-native";
 import { colors, spacing, commonStyles } from "@/theme";
 
 interface CardProps {
@@ -17,7 +17,6 @@ export const Card: React.FC<CardProps> = ({
   onPress,
   padding = "lg",
 }) => {
-    
   const Container = onPress ? Pressable : View;
 
   const cardStyles = [
@@ -32,7 +31,7 @@ export const Card: React.FC<CardProps> = ({
       onPress={onPress}
       style={
         onPress
-          ? ({ pressed }: any) => [cardStyles, pressed && styles.pressed]
+          ? ({ pressed }) => [cardStyles, pressed && styles.pressed]
           : cardStyles
       }
     >
@@ -44,11 +43,10 @@ export const Card: React.FC<CardProps> = ({
 const styles = StyleSheet.create({
   base: {
     borderRadius: 16,
-    marginVertical: spacing.sm,
-    width: '100%',
+    width: "100%",           
   },
   pressed: {
-    opacity: 0.8,
+    opacity: 0.85,
     transform: [{ scale: 0.98 }],
   },
 });
@@ -64,8 +62,8 @@ const variantStyles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: 8,
     ...commonStyles.shadow,
-    borderWidth:1,
-    borderColor:colors.border,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   outline: {
     backgroundColor: "transparent",
@@ -73,7 +71,7 @@ const variantStyles = StyleSheet.create({
     borderColor: colors.border,
   },
   primary: {
-    backgroundColor: colors.white, 
+    backgroundColor: colors.white,
     borderRadius: 8,
   },
 });
