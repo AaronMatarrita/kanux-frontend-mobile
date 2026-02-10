@@ -1,4 +1,6 @@
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View, FlatList, ActivityIndicator } from "react-native";
 import { PenSquare, Search } from "lucide-react-native";
 import Header from "@/components/ui/Header";
@@ -8,6 +10,13 @@ import { FeedPostCard } from "./components/FeedPostCard";
 import { FeedSkeleton } from "./components/FeedSkeleton";
 import styles from "./styles/feedScreen.styles";
 import { useFeed } from "./hooks/useFeed";
+import { FeedPost } from "./types";
+import { FeedStackParamList } from "@/types/navigation";
+
+type FeedScreenNavigationProp = NativeStackNavigationProp<
+  FeedStackParamList,
+  "FeedList"
+>;
 
 const FeedScreen: React.FC = () => {
   const {
@@ -21,6 +30,7 @@ const FeedScreen: React.FC = () => {
     loadMore,
   } = useFeed();
 
+  const navigation = useNavigation<FeedScreenNavigationProp>();
   const isInitialLoading = loading && posts.length === 0 && !refreshing;
 
   return (
@@ -71,8 +81,15 @@ const FeedScreen: React.FC = () => {
           renderItem={({ item }) => (
             <FeedPostCard
               post={item}
-              onPress={() => undefined}
-              onCommentsPress={() => undefined}
+              onPress={(post: FeedPost) =>
+                navigation.navigate("FeedPostDetail", { post })
+              }
+              onCommentsPress={(post: FeedPost) =>
+                navigation.navigate("FeedPostDetail", {
+                  post,
+                  focusComments: true,
+                })
+              }
             />
           )}
         />

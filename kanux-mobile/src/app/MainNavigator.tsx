@@ -7,9 +7,9 @@ import type {
 } from "@navigation";
 import { MessagesNavigator } from "../screens/messages/navigations/MessageNavigations";
 import { ProfileNavigator } from "../screens/profile/navigations/ProfileNavigator";
+import { FeedStack } from "../screens/feed/FeedStack";
 // Screens
 import HomeScreen from "@screens/home/HomeScreen";
-import FeedScreen from "@screens/feed/FeedScreen";
 import ChallengesStack from "@/screens/challenges/ChallengesStack";
 import SkillsScreen from "@/screens/skills/SkillsScreen";
 
@@ -29,7 +29,7 @@ const TabNavigator: React.FC = () => {
       tabBar={(props) => <BottomNavigationBar {...props} />}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Feed" component={FeedScreen} />
+      <Tab.Screen name="Feed" component={FeedStack} />
       <Tab.Screen name="Challenges" component={ChallengesStack} />
       <Tab.Screen name="Messages" component={MessagesNavigator} />
       <Tab.Screen name="Skills" component={SkillsScreen} />

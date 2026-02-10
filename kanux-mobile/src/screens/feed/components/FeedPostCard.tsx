@@ -18,6 +18,8 @@ export const FeedPostCard: React.FC<Props> = ({
   onPress,
   onCommentsPress,
 }) => {
+  const heartColor = post.isLikedByMe ? colors.primary : colors.gray600;
+
   return (
     <Card
       variant="shadow"
@@ -43,7 +45,7 @@ export const FeedPostCard: React.FC<Props> = ({
       <View style={styles.actionsRow}>
         <View style={styles.actionsLeft}>
           <View style={[styles.actionChip, styles.actionChipSpacer]}>
-            <Heart size={16} color={colors.gray600} strokeWidth={1.6} />
+            <Heart size={16} color={heartColor} strokeWidth={1.6} />
             <Text style={styles.actionText}>{post.reactions}</Text>
           </View>
 
@@ -62,7 +64,7 @@ export const FeedPostCard: React.FC<Props> = ({
             <Avatar
               size={28}
               source={
-                post.latestComment?.avatarUrl
+                post.latestComment.avatarUrl
                   ? { uri: post.latestComment.avatarUrl }
                   : undefined
               }
