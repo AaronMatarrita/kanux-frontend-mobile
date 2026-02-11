@@ -25,6 +25,20 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: spacing.sm,
   },
+  avatarFallback: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: colors.gray300,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+  },
+  avatarInitial: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: colors.gray700,
+  },
   name: {
     ...typography.h3,
     color: colors.textColors.primary,

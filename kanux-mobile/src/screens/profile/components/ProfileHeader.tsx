@@ -19,6 +19,9 @@ export default function ProfileHeader({ profile, onEditPress }: Props) {
   const completion = Math.min(100, Math.max(0, profile.completion.percentage));
   const showMotivation = completion < 100;
 
+  const initial =
+    profile.basicInfo.fullName?.trim()?.charAt(0)?.toUpperCase() ?? "?";
+
   return (
     <View style={styles.wrapper}>
       <Card variant="shadow" padding="lg" style={styles.card}>
@@ -26,10 +29,13 @@ export default function ProfileHeader({ profile, onEditPress }: Props) {
           <EditButton onPress={onEditPress} />
         </View>
 
-        <Image
-          source={{ uri: profile?.avatarUrl ?? "https://i.pravatar.cc/100" }}
-          style={styles.avatar}
-        />
+        {profile?.avatarUrl ? (
+          <Image source={{ uri: profile.avatarUrl }} style={styles.avatar} />
+        ) : (
+          <View style={styles.avatarFallback}>
+            <Text style={styles.avatarInitial}>{initial}</Text>
+          </View>
+        )}
 
         <Text style={styles.name}>{profile.basicInfo.fullName}</Text>
 
