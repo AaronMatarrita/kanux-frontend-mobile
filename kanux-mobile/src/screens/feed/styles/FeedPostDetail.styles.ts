@@ -222,4 +222,9 @@ export default StyleSheet.create({
     marginTop: spacing.xs,
     textAlign: "center",
   },
+
+  commentsStateWrap: {
+    marginTop: spacing.md,
+    paddingVertical: spacing.lg,
+  },
 });

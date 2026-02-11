@@ -1,83 +1,86 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { colors, typography, commonStyles } from "@theme";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/Button";
+import React, { useMemo } from "react";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { ChallengesStackParamList } from "@/types/navigation";
+import { ChallengesPreview } from "./components/ChallengesPreview";
+import { SafeAreaView, ScrollView, View, StatusBar } from "react-native";
+import { homeStyles } from "./styles/home.styles";
+import { spacing } from "../../theme/spacing";
+import { HomeHero } from "./components/HomeHero";
+import { StatsGrid } from "./components/StatsGrid";
+import { useHomeData } from "./hooks/useHomeData";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { TabNavigatorParamList } from "@navigation";
 
-const HomeScreen: React.FC = () => {
-  const { session, logout } = useAuth();
-  const profile = session?.user?.profile;
-  const fullName = [profile?.first_name, profile?.last_name]
-    .filter(Boolean)
-    .join(" ");
+export default function HomeScreen() {
+  const navigation =
+    useNavigation<BottomTabNavigationProp<TabNavigatorParamList>>();
+  const { session } = useAuth();
+  const {
+    profile,
+    stats,
+    analyticsKpis,
+    bestChallenge,
+    recommended,
+    loading,
+    error,
+  } = useHomeData();
+
+  const realName = useMemo(() => {
+    const first = profile?.first_name ?? session?.user?.profile?.first_name;
+    const last = profile?.last_name ?? session?.user?.profile?.last_name;
+    const email = session?.user?.email;
+
+    if (first && last) return `${first} ${last}`;
+    return first || last || email || "Usuario";
+  }, [
+    profile?.first_name,
+    profile?.last_name,
+    session?.user?.profile,
+    session?.user?.email,
+  ]);
 
   return (
-    <View style={[commonStyles.container, styles.container]}>
-      <Text style={styles.title}>Home</Text>
+    <SafeAreaView style={homeStyles.container}>
+      <StatusBar barStyle="light-content" />
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Usuario actual</Text>
-        <Text style={styles.label}>Email:</Text>
-        <Text style={styles.value}>{session?.user?.email || "-"}</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={homeStyles.scrollContent}
+        contentInsetAdjustmentBehavior="never"
+      >
+        <HomeHero
+          userName={realName}
+          onPressNotifications={() => console.log("Notifications")}
+        />
 
-        <Text style={styles.label}>ID:</Text>
-        <Text style={styles.value}>{session?.user?.id || "-"}</Text>
+        <View style={homeStyles.floatingArea}>
+          <StatsGrid
+            stats={stats}
+            loading={loading}
+            onPressStat={(key) => console.log("Stat pressed", key)}
+          />
 
-        <Text style={styles.label}>Tipo:</Text>
-        <Text style={styles.value}>{session?.user?.userType || "-"}</Text>
-
-        <Text style={styles.label}>Nombre:</Text>
-        <Text style={styles.value}>{fullName || "-"}</Text>
-      </View>
-
-      <Button
-        title="Cerrar sesión"
-        onPress={logout}
-        variant="outline"
-        style={styles.logoutButton}
-      />
-    </View>
+          <View style={{ marginTop: 32 }}>
+            <ChallengesPreview
+              items={recommended}
+              totalAvailableText={`Últimos ${recommended.length} desafíos`}
+              onPressChallenge={(id) =>
+                navigation.navigate("Challenges", {
+                  screen: "ChallengeDetail",
+                  params: { challengeId: id },
+                } as never)
+              }
+              onPressSeeMore={() =>
+                navigation.navigate("Challenges", {
+                  screen: "ChallengesList",
+                } as never)
+              }
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
-  title: {
-    ...typography.h1,
-    color: colors.textColors.primary,
-    textAlign: "center",
-    marginBottom: 18,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.textColors.primary,
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 12,
-    color: colors.textColors.tertiary,
-    marginTop: 8,
-  },
-  value: {
-    fontSize: 14,
-    color: colors.textColors.primary,
-    marginTop: 2,
-  },
-  logoutButton: {
-    marginTop: 18,
-  },
-});
-
-export default HomeScreen;
+}

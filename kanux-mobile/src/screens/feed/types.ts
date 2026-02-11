@@ -17,6 +17,7 @@ export type FeedPost = {
   latestComment?: FeedComment;
   isLikedByMe?: boolean;
   commentsList?: FeedComment[];
+  isOwner: boolean;
 };
 
 export type FeedUserApi = {
