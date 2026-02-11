@@ -23,7 +23,6 @@ export const SoftChallengeDetails: React.FC<SoftDetailsProps> = ({
             challengeId: data.id
         });
     };
-    console.log(data);
     return (
         <View style={styles.mainContainer}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
