@@ -1,25 +1,45 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { ChallengesStackParamList } from "@/types/navigation";
+import { ChallengesPreview } from "./components/ChallengesPreview";
 import { SafeAreaView, ScrollView, View, StatusBar } from "react-native";
 import { homeStyles } from "./styles/home.styles";
 import { spacing } from "../../theme/spacing";
 import { HomeHero } from "./components/HomeHero";
 import { StatsGrid } from "./components/StatsGrid";
-import { AnalyticsSnapshot } from "./components/AnalyticsSnapshot";
-import { ChallengesPreview } from "./components/ChallengesPreview";
-import { useHomeMock } from "./hooks/useHomeMock";
+import { useHomeData } from "./hooks/useHomeData";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { TabNavigatorParamList } from "@navigation";
 
 export default function HomeScreen() {
+  const navigation =
+    useNavigation<BottomTabNavigationProp<TabNavigatorParamList>>();
   const { session } = useAuth();
-  const { stats, analyticsKpis, bestChallenge, recommended } = useHomeMock();
+  const {
+    profile,
+    stats,
+    analyticsKpis,
+    bestChallenge,
+    recommended,
+    loading,
+    error,
+  } = useHomeData();
 
-  const realName =
-    session?.user?.profile?.first_name && session?.user?.profile?.last_name
-      ? `${session.user.profile.first_name} ${session.user.profile.last_name}`
-      : session?.user?.profile?.first_name ||
-        session?.user?.profile?.last_name ||
-        session?.user?.email ||
-        "Usuario";
+  const realName = useMemo(() => {
+    const first = profile?.first_name ?? session?.user?.profile?.first_name;
+    const last = profile?.last_name ?? session?.user?.profile?.last_name;
+    const email = session?.user?.email;
+
+    if (first && last) return `${first} ${last}`;
+    return first || last || email || "Usuario";
+  }, [
+    profile?.first_name,
+    profile?.last_name,
+    session?.user?.profile,
+    session?.user?.email,
+  ]);
 
   return (
     <SafeAreaView style={homeStyles.container}>
@@ -38,22 +58,25 @@ export default function HomeScreen() {
         <View style={homeStyles.floatingArea}>
           <StatsGrid
             stats={stats}
+            loading={loading}
             onPressStat={(key) => console.log("Stat pressed", key)}
           />
 
-          <View style={{ marginTop: spacing.xl }}>
-            <AnalyticsSnapshot
-              kpis={analyticsKpis}
-              bestChallenge={bestChallenge}
-              onPressOpenAnalytics={() => console.log("Go to Analytics")}
-            />
-          </View>
-
-          <View style={{ marginTop: spacing.xl }}>
+          <View style={{ marginTop: 32 }}>
             <ChallengesPreview
               items={recommended}
-              totalAvailableText="5 disponibles"
-              onPressSeeMore={() => console.log("Go to challenges")}
+              totalAvailableText={`Últimos ${recommended.length} desafíos`}
+              onPressChallenge={(id) =>
+                navigation.navigate("Challenges", {
+                  screen: "ChallengeDetail",
+                  params: { challengeId: id },
+                } as never)
+              }
+              onPressSeeMore={() =>
+                navigation.navigate("Challenges", {
+                  screen: "ChallengesList",
+                } as never)
+              }
             />
           </View>
         </View>

@@ -3,13 +3,12 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { ArrowRight, Rocket } from "lucide-react-native";
 import { colors } from "../../../theme/colors";
 import { spacing } from "../../../theme/spacing";
-import { typography } from "../../../theme/typography";
 import { homeStyles } from "../styles/home.styles";
-import type { RecommendedChallenge } from "../types/home.types";
+import type { Challenge } from "@/services/challenges.service"; // ✅
 import { ChallengeCard } from "./ChallengeCard";
 
 type Props = {
-  items: RecommendedChallenge[];
+  items: Challenge[];
   totalAvailableText: string;
   onPressChallenge?: (id: string) => void;
   onPressSeeMore?: () => void;
@@ -23,7 +22,6 @@ export const ChallengesPreview: React.FC<Props> = ({
 }) => {
   return (
     <View>
-      {/* Section header */}
       <View style={homeStyles.sectionHeaderRow}>
         <View style={{ flex: 1, paddingRight: spacing.md }}>
           <Text
@@ -32,7 +30,7 @@ export const ChallengesPreview: React.FC<Props> = ({
               { fontWeight: "700", fontSize: 16 },
             ]}
           >
-            Desafios recomendados
+            Desafíos recomendados
           </Text>
           <Text
             style={{
@@ -45,7 +43,6 @@ export const ChallengesPreview: React.FC<Props> = ({
           </Text>
         </View>
 
-        {/* Available count chip with icon */}
         <View
           style={{
             flexDirection: "row",
@@ -72,7 +69,6 @@ export const ChallengesPreview: React.FC<Props> = ({
         </View>
       </View>
 
-      {/* Challenge cards with staggered animation */}
       <View style={{ gap: 12 }}>
         {items.slice(0, 2).map((it, idx) => (
           <ChallengeCard
@@ -84,12 +80,11 @@ export const ChallengesPreview: React.FC<Props> = ({
         ))}
       </View>
 
-      {/* Gradient CTA button */}
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={onPressSeeMore}
         accessibilityRole="button"
-        accessibilityLabel="Ver mas desafios"
+        accessibilityLabel="Ver más desafíos"
         hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
         style={{
           marginTop: spacing.lg,
@@ -107,14 +102,8 @@ export const ChallengesPreview: React.FC<Props> = ({
           elevation: 4,
         }}
       >
-        <Text
-          style={{
-            fontSize: 13,
-            fontWeight: "600",
-            color: colors.white,
-          }}
-        >
-          Explorar todos los desafios
+        <Text style={{ fontSize: 13, fontWeight: "600", color: colors.white }}>
+          Explorar todos los desafíos
         </Text>
         <ArrowRight size={16} color={colors.white} />
       </TouchableOpacity>

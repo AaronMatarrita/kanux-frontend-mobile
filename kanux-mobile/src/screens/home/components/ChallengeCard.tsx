@@ -1,14 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { ChevronRight, Zap, Flame, Shield } from "lucide-react-native";
 import { colors } from "../../../theme/colors";
 import { spacing } from "../../../theme/spacing";
 import { typography } from "../../../theme/typography";
 import { commonStyles } from "../../../theme/commonStyles";
-import type { RecommendedChallenge } from "../types/home.types";
+import type { Challenge } from "@/services/challenges.service"; // ✅
 
 type Props = {
-  item: RecommendedChallenge;
+  item: Challenge;
   onPress?: (id: string) => void;
   delay?: number;
 };
@@ -37,6 +37,17 @@ const levelConfig: Record<
   },
 };
 
+function mapDifficultyLabel(
+  raw: unknown,
+): "Principiante" | "Intermedio" | "Avanzado" {
+  const d = String(raw ?? "").toLowerCase();
+  if (d.includes("avan") || d.includes("hard") || d.includes("alto"))
+    return "Avanzado";
+  if (d.includes("inter") || d.includes("med") || d.includes("mid"))
+    return "Intermedio";
+  return "Principiante";
+}
+
 export const ChallengeCard: React.FC<Props> = ({
   item,
   onPress,
@@ -63,21 +74,28 @@ export const ChallengeCard: React.FC<Props> = ({
     return () => clearTimeout(timer);
   }, [fadeAnim, slideAnim, delay]);
 
-  const config = levelConfig[item.level] || levelConfig.Principiante;
+  const title = (item as any).title as string;
+  const description =
+    ((item as any).description as string | null | undefined) ??
+    "Sin descripción";
+  const difficultyRaw = (item as any).difficulty ?? (item as any).level;
+  const level = useMemo(
+    () => mapDifficultyLabel(difficultyRaw),
+    [difficultyRaw],
+  );
+
+  const config = levelConfig[level];
   const LevelIcon = config.Icon;
 
   return (
     <Animated.View
-      style={{
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }],
-      }}
+      style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
     >
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => onPress?.(item.id)}
+        onPress={() => onPress?.(String((item as any).id))}
         accessibilityRole="button"
-        accessibilityLabel={`Abrir desafio: ${item.title}`}
+        accessibilityLabel={`Abrir desafío: ${title}`}
         hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
         style={{
           borderRadius: 20,
@@ -88,7 +106,6 @@ export const ChallengeCard: React.FC<Props> = ({
           ...commonStyles.shadow,
         }}
       >
-        {/* Title row */}
         <View style={[commonStyles.rowBetween, { marginBottom: spacing.sm }]}>
           <Text
             style={[
@@ -101,19 +118,19 @@ export const ChallengeCard: React.FC<Props> = ({
               },
             ]}
           >
-            {item.title}
+            {title}
           </Text>
+
           <Text
             style={[
               typography.caption,
               { color: colors.textColors.tertiary, fontSize: 10 },
             ]}
           >
-            {item.orderTag}
+            {level}
           </Text>
         </View>
 
-        {/* Description */}
         <Text
           style={[
             typography.bodySmall,
@@ -125,12 +142,10 @@ export const ChallengeCard: React.FC<Props> = ({
           ]}
           numberOfLines={2}
         >
-          {item.description}
+          {description}
         </Text>
 
-        {/* Footer */}
         <View style={[commonStyles.rowBetween, { marginTop: spacing.lg }]}>
-          {/* Level badge with icon */}
           <View
             style={{
               flexDirection: "row",
@@ -151,11 +166,10 @@ export const ChallengeCard: React.FC<Props> = ({
                 { color: config.textColor, fontWeight: "600", fontSize: 11 },
               ]}
             >
-              {item.level}
+              {level}
             </Text>
           </View>
 
-          {/* Details button */}
           <View
             style={{
               flexDirection: "row",

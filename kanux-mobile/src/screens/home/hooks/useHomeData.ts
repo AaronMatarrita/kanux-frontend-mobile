@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { analyticsService } from "@/services/analytics.service";
 import { profilesService } from "@/services/profiles.service";
+import { challengesService, Challenge } from "@/services/challenges.service";
 import type { TalentAnalyticsDashboard } from "@/types/analytics.types";
 import type {
   DashboardStats,
@@ -13,8 +14,8 @@ interface UseHomeData {
   userName: string;
   stats: DashboardStats | null;
   analyticsKpis: TalentAnalyticsDashboard | null;
-  bestChallenge: DashboardChallenge | null;
-  recommended: DashboardChallenge[];
+  bestChallenge: Challenge | null;
+  recommended: Challenge[];
   profile: TalentProfile | null;
   feed: FeedPost[];
   loading: boolean;
@@ -24,27 +25,29 @@ interface UseHomeData {
 function normalizeError(err: unknown): string {
   if (err instanceof Error) return err.message;
   if (typeof err === "string") return err;
-  return "Error al cargar datos de Home";
+  return "Error al cargar Home";
 }
 
 export const useHomeData = (): UseHomeData => {
-  const [userName, setUserName] = useState("");
+  const [userName, setUserName] = useState<string>("");
+
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [analyticsKpis, setAnalyticsKpis] =
     useState<TalentAnalyticsDashboard | null>(null);
-  const [bestChallenge, setBestChallenge] = useState<DashboardChallenge | null>(
-    null,
-  );
-  const [recommended, setRecommended] = useState<DashboardChallenge[]>([]);
+
+  const [bestChallenge, setBestChallenge] = useState<Challenge | null>(null);
+  const [recommended, setRecommended] = useState<Challenge[]>([]);
+
   const [profile, setProfile] = useState<TalentProfile | null>(null);
   const [feed, setFeed] = useState<FeedPost[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
-    const fetchData = async () => {
+    const fetchHomeData = async (): Promise<void> => {
       setLoading(true);
       setError(null);
 
@@ -53,29 +56,30 @@ export const useHomeData = (): UseHomeData => {
           profileData,
           statsData,
           analyticsData,
-          challengesData,
+          softChallengesRes,
           feedData,
         ] = await Promise.all([
           profilesService.getMyProfile(),
           profilesService.getDashboardStats(),
           analyticsService.getTalentDashboard(),
-          profilesService.getFirstChallenges(),
+          challengesService.listSoftChallenges(1, 5),
           profilesService.getDashboardFeed(),
         ]);
 
         if (!mounted) return;
 
+        // PROFILE
         setProfile(profileData);
-        setUserName(profileData?.first_name ?? "");
-
-        setStats(statsData ?? null);
-        setAnalyticsKpis(analyticsData ?? null);
-
-        const challenges = Array.isArray(challengesData) ? challengesData : [];
-        setRecommended(challenges);
-        setBestChallenge(challenges[0] ?? null);
-
-        setFeed(Array.isArray(feedData) ? feedData : []);
+        setUserName(profileData.first_name ?? "");
+        // STATS
+        setStats(statsData);
+        // ANALYTICS
+        setAnalyticsKpis(analyticsData);
+        // CHALLENGES
+        setRecommended(softChallengesRes.data);
+        setBestChallenge(softChallengesRes.data[0] ?? null);
+        // FEED
+        setFeed(feedData);
       } catch (err) {
         if (!mounted) return;
         setError(normalizeError(err));
@@ -85,7 +89,7 @@ export const useHomeData = (): UseHomeData => {
       }
     };
 
-    void fetchData();
+    void fetchHomeData();
 
     return () => {
       mounted = false;

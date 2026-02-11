@@ -104,7 +104,7 @@ export const HomeHero: React.FC<Props> = ({
         </View>
         <Text style={[homeStyles.heroSubtitle, { maxWidth: 300 }]}>
           Aqui esta lo que ha estado pasando mientras estabas fuera.
-        </Text>{" "}
+        </Text>
       </Animated.View>
     </View>
   );

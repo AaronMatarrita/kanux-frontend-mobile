@@ -1,16 +1,38 @@
 import React, { useMemo } from "react";
 import { View, useWindowDimensions, StyleSheet } from "react-native";
-import type { HomeStat } from "../types/home.types";
 import { spacing } from "../../../theme/spacing";
 import { StatPill } from "./StatPill";
-import { BadgeCheck, Trophy, MessageCircle } from "lucide-react-native";
+import {
+  BadgeCheck,
+  Trophy,
+  MessageCircle,
+  FileText,
+} from "lucide-react-native";
+import type { DashboardStats } from "@/services/profiles.service";
 
-type Props = {
-  stats: HomeStat[];
-  onPressStat?: (key: HomeStat["key"]) => void;
+export type HomeStatKey =
+  | "skills"
+  | "completedChallenges"
+  | "unreadMessages"
+  | "posts";
+
+type StatVM = {
+  key: HomeStatKey;
+  label: string;
+  value: string;
 };
 
-export const StatsGrid: React.FC<Props> = ({ stats, onPressStat }) => {
+type Props = {
+  stats: DashboardStats | null;
+  loading?: boolean;
+  onPressStat?: (key: HomeStatKey) => void;
+};
+
+export const StatsGrid: React.FC<Props> = ({
+  stats,
+  loading = false,
+  onPressStat,
+}) => {
   const { width } = useWindowDimensions();
 
   const columns = useMemo(() => {
@@ -19,18 +41,6 @@ export const StatsGrid: React.FC<Props> = ({ stats, onPressStat }) => {
     return 2;
   }, [width]);
 
-  const mapAccent = (key: HomeStat["key"]) => {
-    if (key === "unreadMessages") return "message" as const;
-    if (key === "completedChallenges") return "success" as const;
-    return "primary" as const;
-  };
-
-  const mapIcon = (key: HomeStat["key"]) => {
-    if (key === "unreadMessages") return MessageCircle;
-    if (key === "completedChallenges") return Trophy;
-    return BadgeCheck;
-  };
-
   const itemWidth = useMemo(() => {
     const horizontalPadding = spacing.lg * 2;
     const totalGutters = spacing.md * (columns - 1);
@@ -38,9 +48,41 @@ export const StatsGrid: React.FC<Props> = ({ stats, onPressStat }) => {
     return usable / columns;
   }, [columns, width]);
 
+  const items: StatVM[] = useMemo(() => {
+    const v = (n: number | undefined) => (loading ? "…" : String(n ?? 0));
+
+    return [
+      { key: "skills", label: "Habilidades", value: v(stats?.skillsCount) },
+      {
+        key: "completedChallenges",
+        label: "Retos completados",
+        value: v(stats?.completedChallengesCount),
+      },
+      {
+        key: "unreadMessages",
+        label: "Mensajes",
+        value: v(stats?.unreadMessagesCount),
+      },
+      { key: "posts", label: "Publicaciones", value: v(stats?.postsCount) },
+    ];
+  }, [stats, loading]);
+
+  const mapAccent = (key: HomeStatKey) => {
+    if (key === "unreadMessages") return "message" as const;
+    if (key === "completedChallenges") return "success" as const;
+    return "primary" as const;
+  };
+
+  const mapIcon = (key: HomeStatKey) => {
+    if (key === "unreadMessages") return MessageCircle;
+    if (key === "completedChallenges") return Trophy;
+    if (key === "posts") return FileText;
+    return BadgeCheck;
+  };
+
   return (
     <View style={styles.wrap}>
-      {stats.map((s, idx) => (
+      {items.map((s, idx) => (
         <View
           key={s.key}
           style={{

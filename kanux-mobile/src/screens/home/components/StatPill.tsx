@@ -8,7 +8,7 @@ import type { LucideIcon } from "lucide-react-native";
 
 type Props = {
   label: string;
-  value: number;
+  value: number | string;
   Icon: LucideIcon;
   accent?: "primary" | "success" | "message";
   onPress?: () => void;
