@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   View,
   FlatList,
@@ -20,28 +20,35 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Message } from "./types/message";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MessagesStackParamList } from "@navigation";
+import { useWebSocket } from "@/screens/messages/hooks/useWebSocket";
+import { useAuth } from "@/context/AuthContext";
+
 type Props = NativeStackScreenProps<MessagesStackParamList, "Chat">;
 
 const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const { conversationId, conversationName, conversationAvatar } = route.params;
+
+  const tabBarHeight = useBottomTabBarHeight();
+  const flatListRef = useRef<FlatList>(null);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [sending, setSending] = useState(false);
-  const flatListRef = useRef<FlatList>(null);
-  const tabBarHeight = useBottomTabBarHeight();
+
+  const { session, loading: authLoading, isAuthenticated } = useAuth();
+  const token = session?.token;
 
   const loadMessages = async () => {
     try {
       setError(null);
       setLoading(true);
-      console.log(conversationId);
       const response =
         await messagesService.getConversationMessages(conversationId);
-
       setMessages(response.messages);
-    } catch (error) {
-      console.error("Error loading messages:", error);
+    } catch (e) {
+      console.error("Error loading messages:", e);
       setError("Failed to load messages. Please try again.");
       setMessages([]);
     } finally {
@@ -53,10 +60,27 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
     loadMessages();
   }, [conversationId]);
 
+  useWebSocket({
+    token,
+    conversationId,
+    enabled: Boolean(token && conversationId),
+    onMessageReceived: (incoming) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === incoming.id)) return prev;
+        return [...prev, incoming];
+      });
+      flatListRef.current?.scrollToEnd({ animated: true });
+    },
+    onMessageError: (err) => {
+      console.error("Socket message error:", err);
+    },
+  });
+
   const handleSendMessage = async (content: string) => {
-    const tempId = Date.now().toString();
+    const tempId = `temp-${Date.now()}`;
     try {
       setSending(true);
+      setError(null);
 
       const optimisticMessage: Message = {
         id: tempId,
@@ -67,7 +91,6 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
       };
 
       setMessages((prev) => [...prev, optimisticMessage]);
-
       flatListRef.current?.scrollToEnd({ animated: true });
 
       const savedMessage = await messagesService.sendMessage({
@@ -75,14 +98,20 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
         content,
       });
 
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === tempId ? savedMessage : msg)),
-      );
-    } catch (error) {
-      console.error("Error sending message:", error);
-
-      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
-
+      setMessages((prev) => {
+        const replaced = prev.map((m) => (m.id === tempId ? savedMessage : m));
+        const deduped: Message[] = [];
+        const seen = new Set<string>();
+        for (const m of replaced) {
+          if (seen.has(m.id)) continue;
+          seen.add(m.id);
+          deduped.push(m);
+        }
+        return deduped;
+      });
+    } catch (e) {
+      console.error("Error sending message:", e);
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setError("Failed to send message. Please try again.");
     } finally {
       setSending(false);
@@ -119,7 +148,6 @@ const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
     index: number;
   }) => {
     const isSender = item.sender_type === "Talento";
-
     const avatarLetter = isSender ? "T" : getAvatarLetter(conversationName);
 
     const getLocalDateKey = (date: string) =>
