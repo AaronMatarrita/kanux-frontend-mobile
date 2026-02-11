@@ -7,10 +7,19 @@ import { StatsGrid } from "./components/StatsGrid";
 import { AnalyticsSnapshot } from "./components/AnalyticsSnapshot";
 import { ChallengesPreview } from "./components/ChallengesPreview";
 import { useHomeMock } from "./hooks/useHomeMock";
+import { useAuth } from "../../context/AuthContext";
 
 export default function HomeScreen() {
-  const { userName, stats, analyticsKpis, bestChallenge, recommended } =
-    useHomeMock();
+  const { session } = useAuth();
+  const { stats, analyticsKpis, bestChallenge, recommended } = useHomeMock();
+
+  const realName =
+    session?.user?.profile?.first_name && session?.user?.profile?.last_name
+      ? `${session.user.profile.first_name} ${session.user.profile.last_name}`
+      : session?.user?.profile?.first_name ||
+        session?.user?.profile?.last_name ||
+        session?.user?.email ||
+        "Usuario";
 
   return (
     <SafeAreaView style={homeStyles.container}>
@@ -22,7 +31,7 @@ export default function HomeScreen() {
         contentInsetAdjustmentBehavior="never"
       >
         <HomeHero
-          userName={userName}
+          userName={realName}
           onPressNotifications={() => console.log("Notifications")}
         />
 
