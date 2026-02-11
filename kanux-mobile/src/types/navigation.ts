@@ -1,0 +1,46 @@
+import { ImageSourcePropType } from "react-native";
+import { FeedPost } from "@/screens/feed/types";
+
+export type TabNavigatorParamList = {
+  Home: undefined;
+  Feed: undefined;
+  Challenges: undefined;
+  Messages: undefined;
+  Profile: undefined;
+  Skills: undefined;
+};
+
+export type FeedStackParamList = {
+  FeedList: { updatedPost?: FeedPost } | undefined;
+  FeedPostDetail: { post: FeedPost; focusComments?: boolean };
+  CreatePost: undefined;
+  EditPost: { post: FeedPost };
+};
+
+export type ProfileStackParamList = {
+  ProfileMain: undefined;
+  Billing: undefined;
+};
+
+export type RootNavigatorParamList = {
+  Auth: undefined;
+  Main: undefined;
+  Onboarding: undefined;
+};
+
+export type MessagesStackParamList = {
+  MessagesList: undefined;
+  Chat: {
+    conversationId: string;
+    conversationName: string;
+    conversationAvatar?: ImageSourcePropType;
+    companyId?: string;
+  };
+};
+
+export type ChallengesStackParamList = {
+  ChallengesList: undefined;
+  ChallengeDetail: { challengeId: string };
+  ChallengeRun: { challengeId: string };
+  ChallengeResult: { submissionId: string; };
+};
