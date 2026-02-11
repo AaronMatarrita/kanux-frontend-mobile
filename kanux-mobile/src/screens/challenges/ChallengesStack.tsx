@@ -11,7 +11,7 @@ const Stack = createNativeStackNavigator<ChallengesStackParamList>();
 
 const ChallengesStack: React.FC = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="ChallengesList" screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="ChallengesList"
         component={ChallengesScreen}
