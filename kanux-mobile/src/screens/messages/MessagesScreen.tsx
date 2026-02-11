@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -26,9 +26,14 @@ import {
 } from "./utils/conversation";
 import { Conversation } from "./types/message";
 import AppIcon from "@/components/messages/appIcon";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { MessagesStackParamList } from "@navigation";
+import {
+  useWebSocket,
+  Message as SocketMessage,
+} from "@/screens/messages/hooks/useWebSocket";
+import { useAuth } from "@/context/AuthContext";
 
 type NavigationProp = NativeStackNavigationProp<
   MessagesStackParamList,
@@ -40,31 +45,48 @@ const MessagesScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const navigation = useNavigation<NavigationProp>();
+
+  const { session, loading: authLoading, isAuthenticated } = useAuth();
+
+  const token = session?.token;
+
+  const getLatestMessageDate = (conversation: Conversation): Date => {
+    if (conversation.last_message_at) {
+      return new Date(conversation.last_message_at);
+    }
+    if (conversation.last_message?.created_at) {
+      return new Date(conversation.last_message.created_at);
+    }
+    return new Date(0);
+  };
+
+  const sortConversations = useCallback((data: Conversation[]) => {
+    return [...data].sort((a, b) => {
+      const aUnread = getUnreadCount(a);
+      const bUnread = getUnreadCount(b);
+
+      if (aUnread !== bUnread) {
+        return bUnread - aUnread;
+      }
+
+      const aDate = getLatestMessageDate(a);
+      const bDate = getLatestMessageDate(b);
+
+      return bDate.getTime() - aDate.getTime();
+    });
+  }, []);
 
   const loadConversations = async () => {
     try {
       setError(null);
       setLoading(true);
+
       const data = await messagesService.getUserConversations();
-
-      const sortedConversations = data.sort((a, b) => {
-        const aUnread = getUnreadCount(a);
-        const bUnread = getUnreadCount(b);
-
-        if (aUnread !== bUnread) {
-          return bUnread - aUnread;
-        }
-
-        const aDate = getLatestMessageDate(a);
-        const bDate = getLatestMessageDate(b);
-
-        return bDate.getTime() - aDate.getTime();
-      });
-
-      setConversations(sortedConversations);
-    } catch (error) {
-      console.error("Error loading conversations:", error);
+      setConversations(sortConversations(data));
+    } catch (e) {
+      console.error("Error loading conversations:", e);
       setError("No se pudieron cargar las conversaciones. Intenta nuevamente.");
       setConversations([]);
     } finally {
@@ -72,21 +94,16 @@ const MessagesScreen: React.FC = () => {
     }
   };
 
-  const getLatestMessageDate = (conversation: Conversation): Date => {
-    if (conversation.last_message_at) {
-      return new Date(conversation.last_message_at);
-    }
-
-    if (conversation.last_message?.created_at) {
-      return new Date(conversation.last_message.created_at);
-    }
-
-    return new Date(0);
-  };
-
   useEffect(() => {
     loadConversations();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadConversations();
+      return () => {};
+    }, []),
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -102,6 +119,46 @@ const MessagesScreen: React.FC = () => {
       companyId: conversation.company?.id,
     });
   };
+
+  useWebSocket({
+    token,
+    enabled: Boolean(token),
+    onMessageReceived: (msg: SocketMessage) => {
+      setConversations((prev) => {
+        const idx = prev.findIndex(
+          (c) => c.id === (msg as any).conversation_id,
+        );
+        if (idx === -1) {
+          loadConversations();
+          return prev;
+        }
+
+        const current = prev[idx];
+
+        const updated: Conversation = {
+          ...current,
+          last_message_at: msg.created_at,
+          last_message: {
+            ...(current as any).last_message,
+            id: msg.id,
+            sender_type: msg.sender_type,
+            content: msg.content,
+            created_at: msg.created_at,
+            is_read: false,
+          },
+        } as any;
+
+        const next = [...prev];
+        next[idx] = updated;
+
+        const resorted = sortConversations(next);
+        return resorted;
+      });
+    },
+    onMessageError: (err) => {
+      console.error("Socket message error:", err);
+    },
+  });
 
   const renderItem = ({
     item,
