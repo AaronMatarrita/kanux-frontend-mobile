@@ -21,13 +21,19 @@ export const SoftChallengeResultsScreen: React.FC = () => {
     const { resultData, feedback, loading, copied, copyToClipboard, error, fetchData } = useSoftChallengeResults(submissionId);
     const finalScore = feedback.finalScore ?? Math.round(resultData?.score ?? 0);
     const isPassed = finalScore >= 60;
+    const handleGoHome = () => {
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'ChallengesList' }],
+        });
+    };
 
     return (
         <>
             <Header
                 title="Resultados"
                 leftIcon={<ChevronLeft color={colors.textColors.inverted} size={24} />}
-                onLeftPress={() => navigation.navigate("ChallengesList")}
+                onLeftPress={() => {handleGoHome()}}
             />
             {loading ? (
                 <ResultsSkeleton />
@@ -207,7 +213,7 @@ export const SoftChallengeResultsScreen: React.FC = () => {
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
-                                    onPress={() => navigation.navigate("ChallengesList")}
+                                    onPress={() => {handleGoHome()}}
                                     style={styles.primaryButton}
                                 >
                                     <Text style={styles.primaryButtonText}>Continuar</Text>
