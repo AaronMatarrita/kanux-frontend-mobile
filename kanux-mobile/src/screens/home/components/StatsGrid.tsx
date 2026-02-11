@@ -1,5 +1,5 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useMemo } from "react";
+import { View, useWindowDimensions, StyleSheet } from "react-native";
 import type { HomeStat } from "../types/home.types";
 import { spacing } from "../../../theme/spacing";
 import { StatPill } from "./StatPill";
@@ -11,10 +11,18 @@ type Props = {
 };
 
 export const StatsGrid: React.FC<Props> = ({ stats, onPressStat }) => {
+  const { width } = useWindowDimensions();
+
+  const columns = useMemo(() => {
+    if (width >= 1024) return 4;
+    if (width >= 768) return 3;
+    return 2;
+  }, [width]);
+
   const mapAccent = (key: HomeStat["key"]) => {
-    if (key === "unreadMessages") return "message";
-    if (key === "completedChallenges") return "success";
-    return "primary";
+    if (key === "unreadMessages") return "message" as const;
+    if (key === "completedChallenges") return "success" as const;
+    return "primary" as const;
   };
 
   const mapIcon = (key: HomeStat["key"]) => {
@@ -23,35 +31,40 @@ export const StatsGrid: React.FC<Props> = ({ stats, onPressStat }) => {
     return BadgeCheck;
   };
 
-  return (
-    <View style={{ gap: spacing.md }}>
-      <View style={{ flexDirection: "row", gap: spacing.md }}>
-        <StatPill
-          label={stats[0]?.label ?? "Habilidades verificadas"}
-          value={stats[0]?.value ?? 0}
-          Icon={mapIcon(stats[0]?.key ?? "verifiedSkills")}
-          accent={mapAccent(stats[0]?.key ?? "verifiedSkills")}
-          onPress={() => stats[0] && onPressStat?.(stats[0].key)}
-        />
-        <StatPill
-          label={stats[1]?.label ?? "Desafíos completados"}
-          value={stats[1]?.value ?? 0}
-          Icon={mapIcon(stats[1]?.key ?? "completedChallenges")}
-          accent={mapAccent(stats[1]?.key ?? "completedChallenges")}
-          onPress={() => stats[1] && onPressStat?.(stats[1].key)}
-        />
-      </View>
+  const itemWidth = useMemo(() => {
+    const horizontalPadding = spacing.lg * 2;
+    const totalGutters = spacing.md * (columns - 1);
+    const usable = Math.max(0, width - horizontalPadding - totalGutters);
+    return usable / columns;
+  }, [columns, width]);
 
-      <View style={{ flexDirection: "row", gap: spacing.md }}>
-        <StatPill
-          label={stats[2]?.label ?? "Mensajes sin leer"}
-          value={stats[2]?.value ?? 0}
-          Icon={mapIcon(stats[2]?.key ?? "unreadMessages")}
-          accent={mapAccent(stats[2]?.key ?? "unreadMessages")}
-          onPress={() => stats[2] && onPressStat?.(stats[2].key)}
-        />
-        <View style={{ flex: 1 }} />
-      </View>
+  return (
+    <View style={styles.wrap}>
+      {stats.map((s, idx) => (
+        <View
+          key={s.key}
+          style={{
+            width: itemWidth,
+            marginRight: (idx + 1) % columns === 0 ? 0 : spacing.md,
+            marginBottom: spacing.md,
+          }}
+        >
+          <StatPill
+            label={s.label}
+            value={s.value}
+            Icon={mapIcon(s.key)}
+            accent={mapAccent(s.key)}
+            onPress={() => onPressStat?.(s.key)}
+          />
+        </View>
+      ))}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  wrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+});

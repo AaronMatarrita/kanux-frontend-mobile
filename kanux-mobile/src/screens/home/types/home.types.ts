@@ -8,8 +8,8 @@ export type RecommendedChallenge = {
   id: string;
   title: string;
   description: string;
-  level: "Básico" | "Intermedio";
-  orderTag: string; // "#01"
+  level: "Básico" | "Intermedio" | "Avanzado";
+  orderTag: string;
 };
 
 export type AnalyticsKpi = {

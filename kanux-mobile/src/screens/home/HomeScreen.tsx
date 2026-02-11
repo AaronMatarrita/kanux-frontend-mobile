@@ -19,13 +19,19 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={homeStyles.scrollContent}
+        contentInsetAdjustmentBehavior="never"
       >
-        <HomeHero userName={userName} />
+        <HomeHero
+          userName={userName}
+          onPressNotifications={() => console.log("Notifications")}
+        />
 
         <View style={homeStyles.floatingArea}>
-          <StatsGrid stats={stats} />
+          <StatsGrid
+            stats={stats}
+            onPressStat={(key) => console.log("Stat pressed", key)}
+          />
 
-          {/* Analytics snapshot (nuevo) */}
           <View style={{ marginTop: spacing.xl }}>
             <AnalyticsSnapshot
               kpis={analyticsKpis}
@@ -34,7 +40,6 @@ export default function HomeScreen() {
             />
           </View>
 
-          {/* Challenges */}
           <View style={{ marginTop: spacing.xl }}>
             <ChallengesPreview
               items={recommended}

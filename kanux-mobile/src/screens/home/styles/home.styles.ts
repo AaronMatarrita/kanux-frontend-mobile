@@ -14,26 +14,30 @@ export const homeStyles = StyleSheet.create({
     paddingBottom: spacing.xxxl,
   },
 
-  // Hero
   heroWrap: {
     backgroundColor: colors.primary,
+    width: "100%",
     paddingTop: spacing.xxl,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxxl,
+    paddingBottom: spacing.xxxl + spacing.lg,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
+    overflow: "hidden",
   },
   heroTitle: {
     ...typography.h2,
     color: colors.white,
+    fontWeight: "700",
+    fontSize: 22,
+    lineHeight: 28,
   },
   heroSubtitle: {
-    ...typography.bodySmall,
-    color: "rgba(255,255,255,0.85)",
+    fontSize: 13,
+    lineHeight: 20,
+    color: "rgba(255,255,255,0.75)",
     marginTop: spacing.sm,
   },
 
-  // Decorative bubbles (vida sin inventar data)
   bubble1: {
     position: "absolute",
     right: -30,
@@ -41,7 +45,7 @@ export const homeStyles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(255,255,255,0.07)",
   },
   bubble2: {
     position: "absolute",
@@ -50,13 +54,15 @@ export const homeStyles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
 
-  // Floating area
   floatingArea: {
-    marginTop: -spacing.xxl, // “cards flotando” como el ejemplo
+    marginTop: -spacing.xxl,
     paddingHorizontal: spacing.lg,
+    width: "100%",
+    maxWidth: 920,
+    alignSelf: "center",
   },
 
   section: {
@@ -71,12 +77,14 @@ export const homeStyles = StyleSheet.create({
   sectionTitle: {
     ...typography.h3,
     color: colors.textColors.primary,
+    fontWeight: "700",
+    fontSize: 16,
   },
 
   sectionSubtitle: {
-    ...typography.bodySmall,
+    fontSize: 12,
     color: colors.textColors.secondary,
-    marginTop: spacing.xs,
+    marginTop: 2,
   },
 
   chip: {
