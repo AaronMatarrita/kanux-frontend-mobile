@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { colors, spacing, typography } from "@/theme";
 import { Card } from "@/components/ui/Card";
 import { Ionicons } from "@expo/vector-icons";
+import { LogOut } from "lucide-react-native";
+import { ConfirmActionSheet } from "@/components/ui/ConfirmActionSheet";
 
 type SettingItem = {
   id: string;
@@ -10,19 +12,49 @@ type SettingItem = {
   icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   badge?: string;
+  danger?: boolean;
 };
 
 type Props = {
   onBillingPress: () => void;
+  onLogoutPress: () => Promise<void> | void;
 };
 
-export const SettingsSection: React.FC<Props> = ({ onBillingPress }) => {
+export const SettingsSection: React.FC<Props> = ({
+  onBillingPress,
+  onLogoutPress,
+}) => {
+  const [logoutVisible, setLogoutVisible] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const openLogout = () => setLogoutVisible(true);
+  const closeLogout = () => {
+    if (!logoutLoading) setLogoutVisible(false);
+  };
+
+  const confirmLogout = async () => {
+    try {
+      setLogoutLoading(true);
+      await onLogoutPress();
+      setLogoutVisible(false);
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
+
   const settings: SettingItem[] = [
     {
       id: "billing",
       label: "Planes y suscripción",
       icon: "card-outline",
       onPress: onBillingPress,
+    },
+    {
+      id: "logout",
+      label: "Cerrar sesión",
+      icon: "log-out-outline",
+      danger: true,
+      onPress: openLogout,
     },
   ];
 
@@ -43,12 +75,30 @@ export const SettingsSection: React.FC<Props> = ({ onBillingPress }) => {
               ]}
               onPress={item.onPress}
               activeOpacity={0.7}
+              disabled={logoutLoading && item.id === "logout"}
             >
               <View style={styles.itemLeft}>
-                <View style={styles.iconContainer}>
-                  <Ionicons name={item.icon} size={20} color={colors.primary} />
+                <View
+                  style={[
+                    styles.iconContainer,
+                    item.danger && styles.iconContainerDanger,
+                  ]}
+                >
+                  <Ionicons
+                    name={item.icon}
+                    size={20}
+                    color={item.danger ? colors.error : colors.primary}
+                  />
                 </View>
-                <Text style={styles.itemLabel}>{item.label}</Text>
+
+                <Text
+                  style={[
+                    styles.itemLabel,
+                    item.danger && styles.itemLabelDanger,
+                  ]}
+                >
+                  {item.label}
+                </Text>
               </View>
 
               <View style={styles.itemRight}>
@@ -67,6 +117,19 @@ export const SettingsSection: React.FC<Props> = ({ onBillingPress }) => {
           ))}
         </View>
       </Card>
+
+      <ConfirmActionSheet
+        visible={logoutVisible}
+        onClose={closeLogout}
+        onConfirm={confirmLogout}
+        loading={logoutLoading}
+        title="Cerrar sesión"
+        description="¿Seguro que deseas cerrar sesión?"
+        confirmText="Cerrar sesión"
+        cancelText="Cancelar"
+        tone="destructive"
+        icon={<LogOut size={18} color="#D92D20" />}
+      />
     </View>
   );
 };
@@ -122,10 +185,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: spacing.md,
   },
+  iconContainerDanger: {
+    backgroundColor: colors.error + "14",
+  },
   itemLabel: {
     ...typography.body,
     color: colors.textColors.primary,
     fontWeight: "500",
+  },
+  itemLabelDanger: {
+    color: colors.error,
   },
   itemRight: {
     flexDirection: "row",

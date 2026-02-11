@@ -21,7 +21,12 @@ import { SettingsSection } from "@/screens/profile/components/sections/SettingsS
 import { useTalentProfile } from "./hooks/useTalentProfile";
 import { useProfileEdits } from "./hooks/useProfileEdits";
 
-type ProfileScreenNavigationProp = NativeStackNavigationProp<ProfileStackParamList, "ProfileMain">;
+import { useAuth } from "@/context/AuthContext";
+
+type ProfileScreenNavigationProp = NativeStackNavigationProp<
+  ProfileStackParamList,
+  "ProfileMain"
+>;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<ProfileScreenNavigationProp>();
@@ -47,6 +52,8 @@ export default function ProfileScreen() {
   } = useProfileEdits(profile, catalogs, setProfile);
 
   const modal = useModalState();
+
+  const { logout } = useAuth();
 
   if (loading) {
     return (
@@ -114,7 +121,10 @@ export default function ProfileScreen() {
 
         {tab === "activity" && <ActivitySection />}
 
-        <SettingsSection onBillingPress={() => navigation.navigate("Billing")} />
+        <SettingsSection
+          onBillingPress={() => navigation.navigate("Billing")}
+          onLogoutPress={logout}
+        />
       </ScrollView>
 
       <ProfileEditModals
